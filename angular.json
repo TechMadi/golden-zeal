@@ -124,6 +124,8 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/crm/",
+              "deployUrl": "/crm/",
               "budgets": [
                 {
                   "type": "initial",
