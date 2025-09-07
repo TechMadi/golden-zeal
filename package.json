@@ -7,6 +7,7 @@
     "build": "ng build",
     "build:admin":"ng build golden-zeal",
     "build:landing":"ng build admin-golden-zeal",
+    "build:shared":"ng build shared",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:golden-zeal": "node dist/golden-zeal/server/server.mjs",
