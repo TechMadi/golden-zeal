@@ -7,7 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:golden-zeal": "node dist/golden-zeal/server/server.mjs"
+    "serve:ssr:golden-zeal": "node dist/golden-zeal/server/server.mjs",
+    "serve:landing":"ng serve golden-zeal",
+    "serve:admin":"ng serve admin-golden-zeal --port 4201"
   },
   "private": true,
   "dependencies": {
