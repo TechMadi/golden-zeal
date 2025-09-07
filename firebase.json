@@ -11,6 +11,10 @@
         "source": "/crm/**",
         "destination": "/admin-golden-zeal/browser/index.html"
       },
+       {
+        "source": "/crm",
+        "destination": "/admin-golden-zeal/browser/index.html"
+      },
       {
         "source": "/**",
         "destination": "/golden-zeal/browser/index.html"
