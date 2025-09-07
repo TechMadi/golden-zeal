@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: lts/*
       - run: npm i -g pnpm
-      - run: pnpm install && pnpm build:shared && pnpm build:landing
+      - run: pnpm install && pnpm build:shared && pnpm build:landing && pnpm build:admin
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
