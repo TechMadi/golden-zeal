@@ -20,57 +20,96 @@ import { RouterLink } from '@angular/router';
       </a>
       <button
         type="button"
-        class="md:hidden p-2 rounded"
+        class="md:hidden p-2 rounded z-50"
         (click)="mobileMenuOpen.set(!mobileMenuOpen())"
         aria-label="Toggle menu"
       >
-        @if (mobileMenuOpen()) {
-          <ng-icon name="close" size="24" />
-        } @else {
-          <ng-icon name="menu" size="24" />
-        }
+        <ng-icon name="menu" size="24" />
       </button>
-      <nav
-        class="hidden md:flex items-center gap-8"
-        [class.flex]="mobileMenuOpen()"
-        [class.flex-col]="mobileMenuOpen()"
-        [class.absolute]="mobileMenuOpen()"
-        [class.top-full]="mobileMenuOpen()"
-        [class.left-0]="mobileMenuOpen()"
-        [class.right-0]="mobileMenuOpen()"
-        [class.p-4]="mobileMenuOpen()"
-        [class.gap-4]="mobileMenuOpen()"
-       
-      >
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-8">
         <a
           routerLink="/"
           fragment="about"
-          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white"
-          (click)="mobileMenuOpen.set(false)"
+          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white text-gz-charcoal"
           >About</a
         >
         <a
           routerLink="/"
           fragment="services"
-          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white"
-          (click)="mobileMenuOpen.set(false)"
+          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white text-gz-charcoal"
           >Services</a
         >
         <a
           routerLink="/"
           fragment="projects"
-          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white"
-          (click)="mobileMenuOpen.set(false)"
+          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white text-gz-charcoal"
           >Projects</a
         >
         <a
           routerLink="/"
           fragment="contact"
-          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white"
-          (click)="mobileMenuOpen.set(false)"
+          class="px-2 py-1 transition font-medium hover:bg-black hover:text-white text-gz-charcoal"
           >Contact</a
         >
       </nav>
+
+      <!-- Full Screen Mobile Menu Overlay -->
+      @if (mobileMenuOpen()) {
+        <div
+          class="fixed inset-0 z-[100] flex flex-col"
+          style="background: var(--gz-gold);"
+        >
+          <!-- Close Button at Top -->
+          <div class="flex justify-end p-6">
+            <button
+              type="button"
+              class="p-2 rounded"
+              (click)="mobileMenuOpen.set(false)"
+              aria-label="Close menu"
+            >
+              <ng-icon name="close" size="32" class="text-gz-charcoal" />
+            </button>
+          </div>
+
+          <!-- Large Menu Options -->
+          <nav class="flex-1 flex flex-col justify-center items-center gap-8 px-6">
+            <a
+              routerLink="/"
+              fragment="about"
+              class="block text-gz-charcoal hover:text-gz-black transition"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold">About</h2>
+            </a>
+            <a
+              routerLink="/"
+              fragment="services"
+              class="block text-gz-charcoal hover:text-gz-black transition"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold">Services</h2>
+            </a>
+            <a
+              routerLink="/"
+              fragment="projects"
+              class="block text-gz-charcoal hover:text-gz-black transition"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold">Projects</h2>
+            </a>
+            <a
+              routerLink="/"
+              fragment="contact"
+              class="block text-gz-charcoal hover:text-gz-black transition"
+              (click)="mobileMenuOpen.set(false)"
+            >
+              <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold">Contact</h2>
+            </a>
+          </nav>
+        </div>
+      }
     </header>
   `,
 })
