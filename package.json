@@ -5,14 +5,14 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:admin":"ng build golden-zeal",
-    "build:landing":"ng build admin-golden-zeal",
-    "build:shared":"ng build shared",
+    "build:admin": "ng build golden-zeal",
+    "build:landing": "ng build admin-golden-zeal",
+    "build:shared": "ng build shared",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:golden-zeal": "node dist/golden-zeal/server/server.mjs",
-    "serve:landing":"ng serve golden-zeal",
-    "serve:admin":"ng serve admin-golden-zeal --port 4201"
+    "serve:landing": "ng serve golden-zeal",
+    "serve:admin": "ng serve admin-golden-zeal --port 4201"
   },
   "private": true,
   "dependencies": {
@@ -24,8 +24,13 @@
     "@angular/platform-server": "^20.0.0",
     "@angular/router": "^20.0.0",
     "@angular/ssr": "^20.2.2",
+    "@emailjs/browser": "^4.4.0",
+    "@ng-icons/core": "^28.0.0",
+    "@ng-icons/lets-icons": "^28.0.0",
+    "@tailwindcss/postcss": "^4.1.18",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",
+    "tailwindcss": "^4.1.18",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
   },
@@ -43,6 +48,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^20.2.0",
+    "postcss": "^8.4.0",
     "typescript": "~5.8.2"
   }
 }

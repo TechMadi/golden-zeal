@@ -1,1 +1,52 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+:root {
+  /* Primary Neutrals */
+  --gz-black: #1f1f1f;
+  --gz-ivory: #f6f3ee;
+  --gz-charcoal: #333333;
+
+  /* Brand Colors */
+  --gz-gold: #d4af37;
+  --gz-green: #0f4d2e;
+
+  /* Supporting Earth Tones */
+  --gz-clay: #8c3b2e;
+  --gz-olive: #6e7468;
+  --gz-sand: #e4ddcf;
+}
+
+body {
+  background: var(--gz-ivory);
+  color: var(--gz-charcoal);
+}
+
+.hero {
+  background: var(--gz-black);
+}
+
+.cta {
+  background: var(--gz-green);
+  color: var(--gz-ivory);
+}
+
+.cta:hover {
+  border-color: var(--gz-gold);
+}
+
+/* Scroll margin for fixed header when using anchor links */
+[id='about'],
+[id='services'],
+[id='projects'],
+[id='faq'],
+[id='contact'] {
+  scroll-margin-top: 5rem;
+}
+
+/* Focus visible for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gz-gold);
+  outline-offset: 2px;
+}

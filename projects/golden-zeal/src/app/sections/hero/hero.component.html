@@ -1,0 +1,61 @@
+<section class="pt-20">
+  <!-- Top section: light background, headline + CTA -->
+  <div
+    class="min-h-[38vh] flex flex-col justify-center px-4 md:px-8 lg:px-12"
+    style="background: var(--gz-ivory); color: var(--gz-charcoal);"
+  >
+    <div class="max-w-8xl mx-auto w-full flex justify-start">
+      <div class="w-full  flex  flex-col md:flex-row justify-between">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl font-medium leading-tight mb-6  w-full md: w-1/2 flex">
+          <span class="text-gz-charcoal">
+            Pictures
+          </span>
+          <span class="text-gz-gold text-4xl md:text-6xl lg:text-8xl">Golden Zeal</span>
+        </h1>
+        <div class="w-full md:max-w-xl  flex  flex-col justify-between">
+          <p>Elevating your ideas into cinematic masterpieces, audio brilliance, and unforgettable storytelling.</p>
+          <a
+            routerLink="/"
+            fragment="contact"
+            class="cta inline-flex items-center gap-2 px-6 py-3 font-medium border-2 border-transparent transition"
+          >
+            <span>Start Your Project</span>
+            <span
+              class="inline-flex items-center justify-center w-8 h-8 shrink-0"
+              style="background: var(--gz-charcoal); color: var(--gz-ivory);"
+            >
+              <ng-icon name="arrowRight" size="18" />
+            </span>
+          </a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom section: full-width image -->
+  <div class="relative min-h-[62vh] w-full overflow-hidden">
+    <div
+      class="absolute inset-0 bg-cover bg-center"
+      style="background-image: url('https://images.pexels.com/photos/19354436/pexels-photo-19354436.jpeg?w=1600');"
+      aria-hidden="true"
+    ></div>
+    <div
+      class="absolute inset-0 opacity-90"
+      style="background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Attribution at bottom -->
+    <div
+      class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-end pb-6 md:pb-8 px-4"
+    >
+      <p
+        class="text-white text-xs md:text-sm uppercase tracking-widest text-center"
+        style="letter-spacing: 0.2em;"
+      >
+        [ An awards winning production studio ]
+      </p>
+    </div>
+  </div>
+</section>
