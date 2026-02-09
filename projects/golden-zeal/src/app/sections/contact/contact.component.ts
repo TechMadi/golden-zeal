@@ -162,22 +162,46 @@ import { ContactEmailService } from '../../core/services/contact-email.service';
         </div>
 
         <!-- Right: Studio image -->
-        <div class="hidden md:block ">
-          <div class="h-full max-h-[400px]">
+        <div class="hidden md:block">
+          <div class="h-full max-h-[400px] relative">
             <img
               src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800"
               alt="Studio"
               class="w-full h-full object-cover mb-0"
             />
+            <!-- Contact info overlay -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-sm">
+              <div class="space-y-2 text-white text-sm">
+                <p>
+                  <a href="tel:+254700000000" class="hover:opacity-80 transition">
+                    +254 700 000 000
+                  </a>
+                </p>
+                <p>
+                  <a href="mailto:info@goldenzealpictures.co.ke" class="hover:opacity-80 transition">
+                    info@goldenzealpictures.co.ke
+                  </a>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
   
       <!-- Footer with copyright and blue line -->
       <div class="px-4 md:px-8 py-6 border-t border-white/10">
-        <p class="text-white text-xs md:text-sm">
-          © 2025 Golden Zeal all right reserved
-        </p>
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <p class="text-white text-xs md:text-sm">
+            © 2025 Golden Zeal all right reserved
+          </p>
+          <div class="flex flex-col md:flex-row gap-4 md:gap-6 text-white text-xs md:text-sm">
+           
+            <a href="mailto:info@goldenzealpictures.co.ke" class="hover:opacity-80 transition">
+              info@goldenzealpictures.co.ke
+            </a>
+            <span>Nairobi, Kenya</span>
+          </div>
+        </div>
         <div class="mt-4 h-0.5" style="background: #5DBCD2;"></div>
       </div>
     </section>

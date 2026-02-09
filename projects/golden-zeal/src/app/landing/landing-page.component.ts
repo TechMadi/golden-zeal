@@ -8,6 +8,7 @@ import { AppServicesComponent } from '../sections/services/services.component';
 import { AppProcessComponent } from '../sections/process/process.component';
 import { AppFaqComponent } from '../sections/faq/faq.component';
 import { AppContactComponent } from '../sections/contact/contact.component';
+import { AppTeamComponent } from '../sections/team/team.component';
 
 @Component({
   selector: 'app-landing-page',
@@ -21,6 +22,7 @@ import { AppContactComponent } from '../sections/contact/contact.component';
     AppServicesComponent,
     AppProcessComponent,
     AppFaqComponent,
+    AppTeamComponent,
     AppContactComponent,
   ],
   template: `
@@ -32,6 +34,7 @@ import { AppContactComponent } from '../sections/contact/contact.component';
       <app-services />
       <app-process />
       <app-faq />
+      <app-team />
       <app-contact />
     <app-footer/>
     </main>

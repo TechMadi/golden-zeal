@@ -61,7 +61,7 @@ export class AppProcessComponent {
   steps = [
     {
       number: 1,
-      title: 'Discovery & Concept',
+      title: 'Discovery & Development',
     },
     {
       number: 2,
@@ -73,7 +73,7 @@ export class AppProcessComponent {
     },
     {
       number: 4,
-      title: 'Delivery & Distribution',
+      title: 'Delivery',
     },
   ];
 }

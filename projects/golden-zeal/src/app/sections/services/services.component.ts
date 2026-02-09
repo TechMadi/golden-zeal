@@ -88,11 +88,11 @@ export class AppServicesComponent {
   selectedCategory = signal<string>('Video Production');
 
   categories: ServiceCategory[] = [
-    { id: 1, name: 'Film Production' },
-    { id: 2, name: 'Motion Graphics' },
-    { id: 3, name: 'Video Production' },
-    { id: 4, name: 'Music Production' },
-    { id: 5, name: 'Post-Production & Editing' },
+    { id: 1, name: 'Feature Films & Documentaries' },
+    { id: 2, name: 'Television & Corporate Video' },
+    { id: 3, name: 'Photography & Visual Campaigns' },
+    { id: 4, name: 'CGI / VFX / SFX' },
+    { id: 5, name: 'Live Streaming & Virtual Events' },
   ];
 
   projects: Project[] = [

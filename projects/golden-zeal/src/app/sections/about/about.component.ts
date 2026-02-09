@@ -33,7 +33,7 @@ import { NgIcon } from '@ng-icons/core';
 
           <!-- Paragraph -->
           <p class="text-white text-base md:text-lg">
-            We provide production services in video music, and film. From viral music videos to stunning short films.
+           We provice  production services in video music,  and  film . From viral music videos to stunning short films.
           </p>
 
           <!-- Buttons -->
@@ -58,8 +58,8 @@ import { NgIcon } from '@ng-icons/core';
           <!-- Stats Table -->
           <div class="pt-8 space-y-0">
             <div class="border-t border-white py-4 flex justify-between items-center">
-              <span class="text-white">EST</span>
-              <span class="text-white">April 15, 1980</span>
+              <span class="text-white">The Nubian Narrative</span>
+              <span class="text-white">Jan 26 , 2024</span>
             </div>
             <div class="border-t border-white py-4 flex justify-between items-center">
               <span class="text-white">Producers</span>

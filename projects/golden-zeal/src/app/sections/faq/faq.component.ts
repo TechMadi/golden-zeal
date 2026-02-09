@@ -65,42 +65,27 @@ interface FaqItem {
   `,
 })
 export class AppFaqComponent {
-  openIndex = signal<number>(4); // Default to item 5 (index 4) being open
+  openIndex = signal<number>(-1);
   faqItems: FaqItem[] = [
     {
-      question: 'What services do you offer?',
+      question: 'What types of projects do you produce?',
       answer:
-        'We provide comprehensive production services including video production, music videos, short films, post-production, editing, color grading, and distribution.',
+        'We produce documentaries, television content, branded films, corporate video, and photography projects.',
     },
     {
-      question: 'How long does a typical project take?',
+      question: 'Do you work outside Kenya?',
       answer:
-        'Project timelines vary based on scope and complexity. We provide detailed schedules during the discovery phase, typically ranging from 2-8 weeks depending on the project type.',
+        'Yes. We operate across East, Central, West, and Southern Africa, with extended collaborations in India and Indonesia.',
     },
     {
-      question: 'What is your production process?',
+      question: 'Do you provide full production support?',
       answer:
-        'Our process follows four key stages: Discovery & Concept, Production, Post-Production, and Delivery & Distribution. Each stage is carefully planned and executed to ensure the highest quality results.',
+        'Yes. From development to delivery, including logistics, permits, crew, and post-production.',
     },
     {
-      question: 'Do you work with clients internationally?',
+      question: 'Can you support international productions filming in Africa?',
       answer:
-        'Yes, we work with clients globally. While based in Kenya, we have experience working on projects across Africa and internationally, adapting our services to meet diverse needs.',
-    },
-    {
-      question: 'How can I get started with a project?',
-      answer:
-        'Simply reach out via our contact page or call us directly. We\'ll schedule a consultation to discuss your ideas, project details, and timeline.',
-    },
-    {
-      question: 'What makes your studio different?',
-      answer:
-        'We combine technical expertise with creative storytelling, ensuring each project is unique and impactful. Our team brings years of experience and a passion for elevating ideas into cinematic masterpieces.',
-    },
-    {
-      question: 'What makes your studio different?',
-      answer:
-        'We combine technical expertise with creative storytelling, ensuring each project is unique and impactful. Our team brings years of experience and a passion for elevating ideas into cinematic masterpieces.',
+        'Absolutely. We operate as a seamless extension of international production teams.',
     },
   ];
 }

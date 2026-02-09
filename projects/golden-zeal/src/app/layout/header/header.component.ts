@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
   imports: [NgIcon, RouterLink],
   template: `
     <header
-      class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 md:px-8 border-b-2 border-gz-charcoal/70"
+      class="fixed backdrop-blur-lg top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-4 md:px-8 border-b-2 border-gz-charcoal/70"
       
     >
       <a routerLink="/" class="flex items-center gap-2">
