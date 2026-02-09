@@ -1,32 +1,41 @@
 <section class="pt-20">
   <!-- Top section: light background, headline + CTA -->
   <div
-    class="min-h-[38vh] flex flex-col justify-center px-4 md:px-8 lg:px-12"
+    class="min-h-[70vh] flex flex-col justify-center px-4 md:px-8 lg:px-12"
     style="background: var(--gz-ivory); color: var(--gz-charcoal);"
   >
     <div class="max-w-8xl mx-auto w-full flex justify-start">
-      <div class="w-full  flex  flex-col md:flex-row justify-between">
-        <h1 class="text-2xl md:text-3xl lg:text-4xl font-medium leading-tight mb-6  w-full md: w-1/2 flex">
-          <span class="text-gz-charcoal">
+      <div class="w-full  flex  lex-col md:flex-row justify-between">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl text-right font-medium leading-tight mb-6    flex flex-col items-start">
+          <span class="text-gz-charcoal align-right ml-auto">
             Pictures
           </span>
-          <span class="text-gz-gold text-4xl md:text-6xl lg:text-8xl">Golden Zeal</span>
+          <span class="text-gz-gold text-4xl md:text-6xl lg:text-[12rem]">Golden Zeal</span>
         </h1>
-        <div class="w-full md:max-w-xl  flex  flex-col justify-between">
-          <p>Elevating your ideas into cinematic masterpieces, audio brilliance, and unforgettable storytelling.</p>
+        <div class="w-full md:max-w-xl  flex  flex-col justify-start my-auto space-y-4">
+          <p class="text-gz-charcoal font-3xl">Elevating your ideas into cinematic masterpieces, audio brilliance, and unforgettable storytelling.</p>
+          <div class="flex flex-row gap-2">
+            <a
+            routerLink="/"
+            fragment="contact"
+            class=" inline-flex items-center px-3 py-1  text-sm transition"
+            style="background: var(--gz-charcoal); color: var(--gz-ivory);"
+          >
+            <span>Start Your Project</span>
+          </a>
+
           <a
             routerLink="/"
             fragment="contact"
-            class="cta inline-flex items-center gap-2 px-6 py-3 font-medium border-2 border-transparent transition"
+            class=" inline-flex px-2 py-1 text-sm font-medium transition"
+            style="background: var(--gz-charcoal); color: var(--gz-ivory);"
           >
-            <span>Start Your Project</span>
-            <span
-              class="inline-flex items-center justify-center w-8 h-8 shrink-0"
-              style="background: var(--gz-charcoal); color: var(--gz-ivory);"
-            >
+            <span class="inline-flex items-center justify-center w-8 h-8 shrink-0 ml-2">
               <ng-icon name="arrowRight" size="18" />
             </span>
           </a>
+            </div>
+        
         </div>
         
       </div>
@@ -37,7 +46,7 @@
   <div class="relative min-h-[62vh] w-full overflow-hidden">
     <div
       class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('https://images.pexels.com/photos/19354436/pexels-photo-19354436.jpeg?w=1600');"
+      style="background-image: url('https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=1600');"
       aria-hidden="true"
     ></div>
     <div
@@ -51,7 +60,7 @@
       class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-end pb-6 md:pb-8 px-4"
     >
       <p
-        class="text-white text-xs md:text-sm uppercase tracking-widest text-center"
+        class="text-white text-xs md:text-sm uppercase tracking-widest text-center bg-gz-charcoal/50 px-4 py-2 rounded-full"
         style="letter-spacing: 0.2em;"
       >
         [ An awards winning production studio ]

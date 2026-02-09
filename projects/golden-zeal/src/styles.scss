@@ -1,4 +1,19 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
+
 @import "tailwindcss";
+
+@theme {
+  --color-gz-black: #1f1f1f;
+  --color-gz-ivory: #f6f3ee;
+  --color-gz-charcoal: #333333;
+  --color-gz-gold: #d4af37;
+  --color-gz-green: #0f4d2e;
+  --color-gz-clay: #8c3b2e;
+  --color-gz-olive: #6e7468;
+  --color-gz-sand: #e4ddcf;
+}
+
 :root {
   /* Primary Neutrals */
   --gz-black: #1f1f1f;
@@ -18,6 +33,16 @@
 body {
   background: var(--gz-ivory);
   color: var(--gz-charcoal);
+  font-family: 'Urbanist', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Bebas Neue', sans-serif;
 }
 
 .hero {
