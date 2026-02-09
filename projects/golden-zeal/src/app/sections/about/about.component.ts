@@ -15,7 +15,7 @@ import { NgIcon } from '@ng-icons/core';
       <div class="max-w-8xl mx-auto grid md:grid-cols-2 gap-12 items-center">
         <!-- Left Column: Image -->
         <div class="w-full flex justify-start">
-          <div class="w-2/3 md:w-1/2 aspect-[2/3]">
+          <div class="w-full md:w-1/2 aspect-[2/3]">
             <img
               src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800"
               alt="About Golden Zeal"
@@ -25,7 +25,7 @@ import { NgIcon } from '@ng-icons/core';
         </div>
 
         <!-- Right Column: Content -->
-        <div class="space-y-6 w-3/4">
+        <div class="space-y-6 w-full md:w-3/4 ">
           <!-- Headline -->
           <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
             Highlighting skilled filmmakers, producers, animators, and others

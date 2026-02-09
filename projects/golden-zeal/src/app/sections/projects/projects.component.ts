@@ -31,9 +31,9 @@ import { NgIcon } from '@ng-icons/core';
             </div>
 
             <!-- Bottom Left: Two Images Side by Side -->
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Portrait Image -->
-              <div class="aspect-square overflow-hidden">
+              <div class="hidden md:block aspect-square overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
                   alt="Portrait"
@@ -47,7 +47,7 @@ import { NgIcon } from '@ng-icons/core';
                 <div class="absolute inset-0">
                   <img
                     src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400"
-                    alt="Background"
+                    alt="A Toast To Friendship Ad"
                     class="w-full h-full object-cover blur-md scale-110"
                   />
                 </div>
@@ -70,8 +70,8 @@ import { NgIcon } from '@ng-icons/core';
                   <p class="text-white text-xs mb-1">Short Film</p>
                   <div class="flex items-baseline justify-between">
                     <div>
-                      <p class="text-white text-xs">Berlin, Germany</p>
-                      <p class="text-white text-base font-semibold">Midnight Echo</p>
+                      <p class="text-white text-xs">Naivas Kikwetu Ad</p>
+                      <p class="text-white text-base font-semibold">Naivas Supermarket</p>
                     </div>
                     <p class="text-white text-xs">[2024]</p>
                   </div>
@@ -80,7 +80,7 @@ import { NgIcon } from '@ng-icons/core';
             </div>
 
             <!-- Paragraph Text -->
-            <p class="text-base text-gz-charcoal leading-relaxed w-1/2">
+            <p class="text-base text-gz-charcoal leading-relaxed w-full  md:w-1/2">
               From edgy music videos to visually captivating films, explore our diverse range of projects.
             </p>
 
