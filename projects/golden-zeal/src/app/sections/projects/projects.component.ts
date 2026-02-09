@@ -9,7 +9,7 @@ import { NgIcon } from '@ng-icons/core';
     <section
       id="projects"
       class="py-16 md:py-24 px-4 md:px-8 lg:px-12"
-      style="background: var(--gz-ivory);"
+      style="background: var(--gz-sand);"
     >
       <div class="max-w-7xl mx-auto">
         <!-- Projects Title -->
