@@ -37,17 +37,19 @@ interface FaqItem {
             <div class="border-t border-gz-charcoal/20 first:border-t-0">
               <button
                 type="button"
-                class="w-full flex items-center justify-between py-6 text-left transition"
+                class="w-full flex items-center justify-between py-6 text-left transition relative z-10"
+                style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;"
                 (click)="openIndex.set(openIndex() === i ? -1 : i)"
+                (touchstart)="openIndex.set(openIndex() === i ? -1 : i)"
               >
-                <div class="flex items-start gap-3">
+                <div class="flex items-start gap-3 flex-1">
                   <span class="text-gz-charcoal font-bold text-sm md:text-base">[{{ i + 1 }}]</span>
                   <span class="text-gz-charcoal font-medium text-sm md:text-base">{{ item.question }}</span>
                 </div>
                 <ng-icon
                   [name]="openIndex() === i ? 'chevronUp' : 'chevronDown'"
                   size="20"
-                  class="text-gz-charcoal shrink-0 ml-4"
+                  class="text-gz-charcoal shrink-0 ml-4 pointer-events-none"
                 />
               </button>
               @if (openIndex() === i) {
