@@ -1,100 +1,184 @@
 import { Component, signal, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { NgIcon } from '@ng-icons/core';
 import { ContactEmailService } from '../../core/services/contact-email.service';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgIcon],
   template: `
     <section
       id="contact"
-      class="py-16 md:py-24 px-4 md:px-8"
+      class="relative"
       style="background: var(--gz-black); color: var(--gz-ivory);"
     >
-      <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
-        <div>
-          <h2 class="text-3xl md:text-4xl font-bold mb-4">Contact us</h2>
-          <p class="text-xl text-white/90 mb-8">Let's create something together</p>
-          <div class="aspect-[4/3] rounded-lg overflow-hidden max-w-md opacity-80">
+      <!-- Header bar with Follow us and social links -->
+      <div class="px-8 md:px-16 py-4 flex items-center justify-between border-b border-white/10 ">
+        <p class="text-white text-sm md:text-xl">Follow us</p>
+        <!-- <div class="flex items-center gap-4 md:gap-6"> -->
+          <a
+            href="https://www.linkedin.com/company/golden-zeal-pictures/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-white hover:opacity-80 transition text-sm md:text-xl"
+            aria-label="LinkedIn"
+          >
+            [LinkedIn]
+          </a>
+          <a
+            href="https://www.instagram.com/goldenzealpictures/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-white hover:opacity-80 transition text-sm md:text-xl"
+            aria-label="Instagram"
+          >
+            [Instagram]
+          </a>
+          <a
+            href="https://www.tiktok.com/@golden.zeal.pictures"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-white hover:opacity-80 transition text-sm md:text-xl"
+            aria-label="TikTok"
+          >
+            [TikTok]
+          </a>
+          <a
+            href="https://vimeo.com/goldenzealpictures"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-white hover:opacity-80 transition text-sm md:text-xl"
+            aria-label="Vimeo"
+          >
+            [Vimeo]
+          </a>
+        <!-- </div> -->
+      </div>
+
+      <!-- Main content: form left, image right -->
+      <div class="grid md:grid-cols-2 gap-8 md:gap-12 px-4 md:px-16 py-12 md:py-16 items-end">
+        <!-- Left: Contact form -->
+        <div class="space-y-8">
+          <div>
+            <h2 class="text-4xl md:text-5xl lg:text-[12rem] font-bold text-white mb-4">
+              Contact us
+            </h2>
+            <p class="text-white/90 text-base md:text-lg">
+              Let's create something Pop-tacular together
+            </p>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+            @if (message()) {
+              <div
+                class="p-4 rounded text-sm"
+                [class.bg-green-900/50]="messageType() === 'success'"
+                [class.bg-red-900/50]="messageType() === 'error'"
+              >
+                {{ message() }}
+              </div>
+            }
+
+            <div>
+              <label for="name" class="block text-white text-sm mb-2">Name</label>
+              <div class="border-b border-white">
+                <input
+                  id="name"
+                  type="text"
+                  formControlName="name"
+                  class="w-full bg-transparent text-white placeholder-white/50 py-2 focus:outline-none focus-visible:outline-none"
+                  placeholder=""
+                />
+              </div>
+              @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                <p class="text-red-300 text-xs mt-1">Name is required</p>
+              }
+            </div>
+
+            <div>
+              <label for="email" class="block text-white text-sm mb-2">Email</label>
+              <div class="border-b border-white">
+                <input
+                  id="email"
+                  type="email"
+                  formControlName="email"
+                  class="w-full bg-transparent text-white placeholder-white/50 py-2 focus:outline-none focus-visible:outline-none"
+                  placeholder=""
+                />
+              </div>
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <p class="text-red-300 text-xs mt-1">Valid email is required</p>
+              }
+            </div>
+
+            <div>
+              <label for="phone" class="block text-white text-sm mb-2">Phone</label>
+              <div class="border-b border-white">
+                <input
+                  id="phone"
+                  type="tel"
+                  formControlName="phone"
+                  class="w-full bg-transparent text-white placeholder-white/50 py-2 focus:outline-none focus-visible:outline-none"
+                  placeholder=""
+                />
+              </div>
+            </div>
+
+            <div>
+              <label for="message" class="block text-white text-sm mb-2">Message</label>
+              <div class="border-b border-white flex items-end">
+                <textarea
+                  id="message"
+                  formControlName="message"
+                  rows="3"
+                  class="w-full bg-transparent text-white placeholder-white/50 py-2 focus:outline-none focus-visible:outline-none resize-none"
+                  placeholder=""
+                ></textarea>
+                <ng-icon name="chevronDown" size="16" class="text-white/50 mb-2 shrink-0" />
+              </div>
+              @if (form.get('message')?.invalid && form.get('message')?.touched) {
+                <p class="text-red-300 text-xs mt-1">Message is required</p>
+              }
+            </div>
+
+            <div class="flex gap-4 pt-4">
+              <button
+                type="button"
+                class="px-6 py-2 border border-white text-white bg-transparent hover:bg-white hover:text-black transition text-sm md:text-base flex items-center gap-2"
+              >
+                <ng-icon name="arrowRight" size="16" />
+                Attach file
+              </button>
+              <button
+                type="submit"
+                class="px-6 py-2 border border-white text-white bg-transparent hover:bg-white hover:text-black transition text-sm md:text-base flex items-center gap-2 disabled:opacity-50"
+                [disabled]="form.invalid || sending()"
+              >
+                {{ sending() ? 'Sending…' : 'Submit Project' }}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Studio image -->
+        <div class="hidden md:block ">
+          <div class="h-full max-h-[400px]">
             <img
-              src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=500"
-              alt="Contact"
-              class="w-full h-full object-cover"
+              src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=800"
+              alt="Studio"
+              class="w-full h-full object-cover mb-0"
             />
           </div>
         </div>
-        <form
-          [formGroup]="form"
-          (ngSubmit)="onSubmit()"
-          class="space-y-4 max-w-md"
-        >
-          @if (message()) {
-            <div
-              class="p-4 rounded"
-              [class.bg-green-900/50]="messageType() === 'success'"
-              [class.bg-red-900/50]="messageType() === 'error'"
-            >
-              {{ message() }}
-            </div>
-          }
-          <div>
-            <label for="name" class="block text-sm font-medium mb-1">Name</label>
-            <input
-              id="name"
-              type="text"
-              formControlName="name"
-              class="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-[var(--gz-gold)]"
-              placeholder="Your name"
-            />
-            @if (form.get('name')?.invalid && form.get('name')?.touched) {
-              <p class="text-red-300 text-sm mt-1">Name is required</p>
-            }
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium mb-1">Email</label>
-            <input
-              id="email"
-              type="email"
-              formControlName="email"
-              class="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-[var(--gz-gold)]"
-              placeholder="your@email.com"
-            />
-            @if (form.get('email')?.invalid && form.get('email')?.touched) {
-              <p class="text-red-300 text-sm mt-1">Valid email is required</p>
-            }
-          </div>
-          <div>
-            <label for="phone" class="block text-sm font-medium mb-1">Phone</label>
-            <input
-              id="phone"
-              type="tel"
-              formControlName="phone"
-              class="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-[var(--gz-gold)]"
-              placeholder="+1 234 567 8900"
-            />
-          </div>
-          <div>
-            <label for="message" class="block text-sm font-medium mb-1">Message</label>
-            <textarea
-              id="message"
-              formControlName="message"
-              rows="4"
-              class="w-full px-4 py-2 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-[var(--gz-gold)] resize-none"
-              placeholder="Tell us about your project"
-            ></textarea>
-            @if (form.get('message')?.invalid && form.get('message')?.touched) {
-              <p class="text-red-300 text-sm mt-1">Message is required</p>
-            }
-          </div>
-          <button
-            type="submit"
-            class="cta px-8 py-3 rounded font-semibold border-2 border-transparent transition disabled:opacity-50"
-            [disabled]="form.invalid || sending()"
-          >
-            {{ sending() ? 'Sending…' : 'Send Project' }}
-          </button>
-        </form>
+      </div>
+  
+      <!-- Footer with copyright and blue line -->
+      <div class="px-4 md:px-8 py-6 border-t border-white/10">
+        <p class="text-white text-xs md:text-sm">
+          © 2025 Golden Zeal all right reserved
+        </p>
+        <div class="mt-4 h-0.5" style="background: #5DBCD2;"></div>
       </div>
     </section>
   `,

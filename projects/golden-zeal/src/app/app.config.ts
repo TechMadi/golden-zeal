@@ -30,6 +30,7 @@ export const appConfig: ApplicationConfig = {
       play: letsPlay,
       chevronDown: letsArrowDown,
       chevronUp: letsArrowTop,
+      link: letsLink,
       instagram: letsLink,
       facebook: letsLink,
       twitter: letsLink,

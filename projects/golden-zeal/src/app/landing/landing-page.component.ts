@@ -25,7 +25,7 @@ import { AppContactComponent } from '../sections/contact/contact.component';
   ],
   template: `
     <app-header />
-    <main>
+    <main class="flex flex-col min-h-screen bg-gz-ivory">
       <app-hero />
       <app-about />
       <app-projects />
@@ -33,8 +33,9 @@ import { AppContactComponent } from '../sections/contact/contact.component';
       <app-process />
       <app-faq />
       <app-contact />
+    <app-footer/>
     </main>
-    <app-footer />
+   
   `,
   styles: [],
 })
