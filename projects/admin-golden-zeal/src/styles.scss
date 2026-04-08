@@ -1,1 +1,192 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* ── Admin design tokens ── */
+@theme {
+  --color-gz-black:   #0f0f0f;
+  --color-gz-surface: #141414;
+  --color-gz-gold:    #C9A04A;
+  --color-gz-text:    #F0EBE0;
+  --color-gz-muted:   #888880;
+  --color-gz-border:  rgba(240,235,224,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #0f0f0f;
+  color: #F0EBE0;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Form inputs ── */
+input, select, textarea {
+  background: #1c1c1c;
+  border: 1px solid rgba(240,235,224,0.12);
+  color: #F0EBE0;
+  border-radius: 3px;
+  padding: 0.5rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.15s;
+
+  &::placeholder { color: #888880; }
+  &:focus { border-color: #C9A04A; }
+}
+
+textarea { resize: vertical; min-height: 100px; }
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  background: #C9A04A;
+  color: #0f0f0f;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.88; }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  color: #888880;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid rgba(240,235,224,0.12);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+
+  &:hover { border-color: #C9A04A; color: #C9A04A; }
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  color: #e05c5c;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(224,92,92,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(224,92,92,0.1); }
+}
+
+/* ── Admin page wrapper ── */
+.admin-page {
+  padding: 2rem;
+  max-width: 960px;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(240,235,224,0.08);
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #F0EBE0;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+}
+
+/* ── Table ── */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888880;
+    border-bottom: 1px solid rgba(240,235,224,0.08);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    color: #F0EBE0;
+    border-bottom: 1px solid rgba(240,235,224,0.05);
+    vertical-align: middle;
+  }
+
+  tr:hover td { background: rgba(201,160,74,0.04); }
+}
+
+/* ── Form card ── */
+.admin-form-card {
+  background: #141414;
+  border: 1px solid rgba(240,235,224,0.08);
+  border-radius: 4px;
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+
+  label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888880;
+    margin-bottom: 0.4rem;
+  }
+}
+
+/* ── Status badge ── */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 2px;
+
+  &.badge-gold   { background: rgba(201,160,74,0.15); color: #C9A04A; }
+  &.badge-muted  { background: rgba(136,136,128,0.15); color: #888880; }
+  &.badge-green  { background: rgba(74,201,116,0.15); color: #4ac974; }
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0f0f0f; }
+::-webkit-scrollbar-thumb { background: rgba(240,235,224,0.12); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201,160,74,0.4); }

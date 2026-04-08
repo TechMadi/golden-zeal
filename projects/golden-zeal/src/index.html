@@ -2,12 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>GoldenZeal</title>
+  <title>Golden Zeal Pictures — Film &amp; TV Production Agency</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Golden Zeal Pictures is a Film and TV Technical Agency based in Nairobi, Kenya. Over 30 years of combined experience across Africa and beyond.">
+  <meta property="og:title" content="Golden Zeal Pictures">
+  <meta property="og:description" content="Film & Television Production Across Africa and Beyond">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://goldenzealpictures.co.ke">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
-<body class="bg-gz-sand">
+<body class="bg-[#0f0f0f]">
+  <div id="gz-preloader">
+    <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" style="height:3rem;opacity:0.9;" />
+  </div>
   <app-root></app-root>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var p = document.getElementById('gz-preloader');
+      if (p) {
+        setTimeout(function () {
+          p.classList.add('fade-out');
+          setTimeout(function () { p.style.display = 'none'; }, 700);
+        }, 1200);
+      }
+    });
+  </script>
 </body>
 </html>
