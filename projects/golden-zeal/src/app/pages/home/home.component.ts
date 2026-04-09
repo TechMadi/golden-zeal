@@ -37,16 +37,17 @@ import type { Project, Showreel } from 'shared';
       <!-- Hero content -->
       <div class="relative z-10 h-full flex flex-col justify-end pb-16 md:pb-24 px-6 md:px-10">
         <div class="max-w-7xl w-full mx-auto">
-          <p class="text-xs tracking-[0.3em] uppercase mb-4 reveal" style="color: var(--gz-gold);">
+          <p appReveal class="text-xs tracking-[0.3em] uppercase mb-4" style="color: var(--gz-gold);">
             Film &amp; Television Production · Nairobi, Kenya
           </p>
           <h1
-            class="leading-none mb-8 reveal reveal-delay-1"
+            appReveal
+            class="leading-none mb-8 reveal-delay-1"
             style="font-size: clamp(3.5rem, 10vw, 10rem); color: var(--gz-text);"
           >
             GOLDEN ZEAL<br />PICTURES
           </h1>
-          <div class="flex flex-wrap gap-4 reveal reveal-delay-2">
+          <div appReveal class="flex flex-wrap gap-4 reveal-delay-2">
             <a routerLink="/commercial" class="btn-gold">View Our Work</a>
             <a routerLink="/contact" class="btn-outline">Start a Project</a>
           </div>
@@ -86,7 +87,7 @@ import type { Project, Showreel } from 'shared';
                 [class.reveal-delay-1]="i === 1"
                 [class.reveal-delay-2]="i === 2"
               >
-                <div [class.aspect-video]="i === 0" [class.aspect-[4/3]]="i !== 0" class="overflow-hidden" style="background: var(--gz-surface);">
+                <div [class.aspect-video]="i === 0" [class.aspect-[4/3]]="i !== 0" class="overflow-hidden relative" style="background: var(--gz-surface);">
                   @if (project.thumbnail_url) {
                     <img
                       [src]="project.thumbnail_url"
@@ -95,7 +96,10 @@ import type { Project, Showreel } from 'shared';
                       loading="lazy"
                     />
                   } @else {
-                    <div class="w-full h-full skeleton"></div>
+                    <div class="w-full h-full flex flex-col items-center justify-center gap-3" style="background: var(--gz-surface2);">
+                      <span class="text-4xl md:text-6xl" style="color: var(--gz-border); font-family: 'Bebas Neue', sans-serif;">GZP</span>
+                      <span class="text-xs tracking-[0.2em] uppercase" style="color: var(--gz-muted);">{{ project.category }}</span>
+                    </div>
                   }
                 </div>
                 <div class="card-overlay">
@@ -120,7 +124,7 @@ import type { Project, Showreel } from 'shared';
     <!-- ── MISSION ── -->
     <section class="py-20 md:py-28 px-6 md:px-10" style="background: var(--gz-surface);">
       <div class="max-w-4xl mx-auto text-center">
-        <p class="text-xs tracking-[0.3em] uppercase mb-6 reveal" style="color: var(--gz-gold);">Our Story</p>
+        <p appReveal class="text-xs tracking-[0.3em] uppercase mb-6" style="color: var(--gz-gold);">Our Story</p>
         <h2 appReveal class="text-4xl md:text-6xl lg:text-7xl leading-tight mb-8" style="color: var(--gz-text);">
           30 YEARS OF COMBINED<br />EXPERIENCE. ONE CONTINENT'S<br />STORIES.
         </h2>
@@ -130,7 +134,7 @@ import type { Project, Showreel } from 'shared';
           We supply film technology, technical services and skilled crew with solid credentials from
           countless international and local productions.
         </p>
-        <div class="flex flex-wrap justify-center gap-4 reveal reveal-delay-2">
+        <div appReveal class="flex flex-wrap justify-center gap-4 reveal-delay-2">
           <a routerLink="/crew" class="btn-gold">Meet The Crew</a>
         </div>
       </div>
@@ -195,7 +199,7 @@ export class HomeComponent implements OnInit {
     const s = this.showreel();
     if (!s) return '';
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${s.vimeo_id}?autoplay=1&loop=1&muted=1&controls=0&byline=0&title=0&portrait=0&transparent=0`
+      `https://player.vimeo.com/video/${s.vimeo_id}?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0`
     );
   }
 

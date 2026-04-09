@@ -146,7 +146,8 @@ select:focus-visible {
    Video hero
    ============================================================ */
 .hero-video-container {
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
 
