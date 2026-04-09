@@ -6,24 +6,24 @@
    Design Tokens
    ============================================================ */
 @theme {
-  --color-gz-black:      #0f0f0f;
-  --color-gz-surface:    #141414;
-  --color-gz-surface2:   #1a1a1a;
+  --color-gz-black:      #0a150f;
+  --color-gz-surface:    #0f1f16;
+  --color-gz-surface2:   #152a1d;
   --color-gz-gold:       #C9A04A;
   --color-gz-gold-muted: rgba(201, 160, 74, 0.15);
   --color-gz-text:       #F0EBE0;
-  --color-gz-muted:      #888880;
+  --color-gz-muted:      #8a9e90;
   --color-gz-border:     rgba(240, 235, 224, 0.1);
 }
 
 :root {
-  --gz-black:      #0f0f0f;
-  --gz-surface:    #141414;
-  --gz-surface2:   #1a1a1a;
+  --gz-black:      #0a150f;
+  --gz-surface:    #0f1f16;
+  --gz-surface2:   #152a1d;
   --gz-gold:       #C9A04A;
   --gz-gold-muted: rgba(201, 160, 74, 0.15);
   --gz-text:       #F0EBE0;
-  --gz-muted:      #888880;
+  --gz-muted:      #8a9e90;
   --gz-border:     rgba(240, 235, 224, 0.1);
 }
 

@@ -33,6 +33,15 @@ import type { Director, Photographer } from 'shared';
           </div>
         }
 
+        <!-- Description -->
+        <div>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Description</label>
+          <textarea formControlName="description" rows="4"
+                    class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none resize-vertical"
+                    style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);"
+                    placeholder="Brief project description shown on the project page..."></textarea>
+        </div>
+
         <!-- Category -->
         <div>
           <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Category</label>
@@ -124,6 +133,7 @@ export class ProjectFormComponent implements OnInit {
     title:          ['', Validators.required],
     slug:           ['', Validators.required],
     client:         [''],
+    description:    [''],
     year:           [new Date().getFullYear()],
     category:       ['commercial', Validators.required],
     director_id:    [''],

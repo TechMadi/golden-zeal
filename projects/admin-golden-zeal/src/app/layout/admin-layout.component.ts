@@ -17,7 +17,7 @@ interface NavItem { label: string; path: string; }
       >
         <!-- Logo -->
         <a routerLink="/dashboard" class="mb-10 px-2">
-          <img src="assets/brand/full_logo.png" alt="GZP" class="h-8 w-auto" />
+          <img src="assets/brand/full_logo.png" alt="GZP" class="h-8 w-auto" style="filter: brightness(0) invert(1);" />
         </a>
 
         <!-- Nav -->
@@ -45,7 +45,7 @@ interface NavItem { label: string; path: string; }
       <!-- Mobile header -->
       <div class="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3"
            style="background: #141414; border-bottom: 1px solid rgba(240,235,224,0.07);">
-        <img src="assets/brand/full_logo.png" alt="GZP" class="h-7 w-auto" />
+        <img src="assets/brand/full_logo.png" alt="GZP" class="h-7 w-auto" style="filter: brightness(0) invert(1);" />
         <button type="button" (click)="mobileOpen.set(!mobileOpen())" class="text-xs tracking-widest uppercase" style="color: #888880;">Menu</button>
       </div>
 

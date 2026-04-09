@@ -25,8 +25,9 @@ import type { Project } from 'shared';
           <a routerLink="/commercial" class="btn-outline">Back to Work</a>
         </div>
       } @else {
-        <!-- Hero: video or image -->
-        <div class="w-full" style="background: #000;">
+
+        <!-- ── VIDEO HERO ── -->
+        <div class="w-full pt-16" style="background: #000;">
           @if (project()!.vimeo_id) {
             <div class="aspect-video w-full">
               <iframe
@@ -44,62 +45,82 @@ import type { Project } from 'shared';
           }
         </div>
 
-        <!-- Credits -->
-        <div class="px-6 md:px-10 py-12 max-w-7xl mx-auto">
-          <div class="grid md:grid-cols-[1fr_auto] gap-8 items-start">
+        <!-- ── TITLE + CREDITS ── -->
+        <div class="px-6 md:px-10 py-14 max-w-7xl mx-auto">
+          <div class="grid md:grid-cols-[1fr_280px] gap-10 items-start">
+
+            <!-- Left: title + description -->
             <div>
-              <p class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">{{ project()!.category }}</p>
-              <h1 class="text-5xl md:text-7xl mb-4" style="color: var(--gz-text);">{{ project()!.title }}</h1>
-            </div>
-            <!-- Meta table -->
-            <div class="space-y-0 min-w-[200px]" style="border-left: 1px solid var(--gz-border); padding-left: 2rem;">
-              @if (project()!.client) {
-                <div class="py-3" style="border-bottom: 1px solid var(--gz-border);">
-                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Client</p>
-                  <p class="text-sm" style="color: var(--gz-text);">{{ project()!.client }}</p>
-                </div>
+              <p appReveal class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">{{ project()!.category }}</p>
+              <h1 appReveal class="mb-6 reveal-delay-1" style="font-size: clamp(2.5rem, 6vw, 5rem); color: var(--gz-text); line-height: 1.05;">
+                {{ project()!.title }}
+              </h1>
+              @if (project()!.description) {
+                <p appReveal class="text-base md:text-lg leading-relaxed reveal-delay-2" style="color: var(--gz-muted); max-width: 600px;">
+                  {{ project()!.description }}
+                </p>
               }
+            </div>
+
+            <!-- Right: credits block -->
+            <div appReveal class="reveal-delay-1" style="border-left: 1px solid var(--gz-border); padding-left: 2rem;">
               @if (project()!.director) {
-                <div class="py-3" style="border-bottom: 1px solid var(--gz-border);">
+                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Director</p>
-                  <a [routerLink]="['/directors', project()!.director!.slug]" class="text-sm transition-colors" style="color: var(--gz-text);">
+                  <a [routerLink]="['/directors', project()!.director!.slug]"
+                     class="text-base transition-colors hover:opacity-80" style="color: var(--gz-text);">
                     {{ project()!.director!.name }}
                   </a>
                 </div>
               }
               @if (project()!.photographer) {
-                <div class="py-3" style="border-bottom: 1px solid var(--gz-border);">
+                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Photographer</p>
-                  <a [routerLink]="['/photographers', project()!.photographer!.slug]" class="text-sm transition-colors" style="color: var(--gz-text);">
+                  <a [routerLink]="['/photographers', project()!.photographer!.slug]"
+                     class="text-base transition-colors hover:opacity-80" style="color: var(--gz-text);">
                     {{ project()!.photographer!.name }}
                   </a>
                 </div>
               }
+              @if (project()!.client) {
+                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
+                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Client</p>
+                  <p class="text-base" style="color: var(--gz-text);">{{ project()!.client }}</p>
+                </div>
+              }
               @if (project()!.year) {
-                <div class="py-3">
+                <div class="py-4">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Year</p>
-                  <p class="text-sm" style="color: var(--gz-text);">{{ project()!.year }}</p>
+                  <p class="text-base" style="color: var(--gz-text);">{{ project()!.year }}</p>
                 </div>
               }
             </div>
           </div>
         </div>
 
-        <!-- Stills gallery -->
-        @if (project()!.stills && project()!.stills!.length > 0) {
-          <div class="px-6 md:px-10 pb-16 max-w-7xl mx-auto">
-            <h2 appReveal class="text-3xl mb-8" style="color: var(--gz-text);">STILLS</h2>
-            <div class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
-              @for (still of project()!.stills!; track still.id) {
-                <div appReveal class="break-inside-avoid overflow-hidden">
-                  <img [src]="still.image_url" [alt]="project()!.title" class="w-full object-cover" loading="lazy" />
+        <!-- ── BEHIND THE SCENES ── -->
+        @if (bts().length > 0) {
+          <div class="px-6 md:px-10 pb-20 max-w-7xl mx-auto" style="border-top: 1px solid var(--gz-border); padding-top: 4rem;">
+            <p appReveal class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">On Set</p>
+            <h2 appReveal class="text-4xl md:text-5xl mb-10 reveal-delay-1" style="color: var(--gz-text);">BEHIND THE SCENES</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" [class.lg:grid-cols-3]="bts().length > 2">
+              @for (still of bts(); track still.id; let i = $index) {
+                <div appReveal class="overflow-hidden" [class.md:col-span-2]="bts().length === 3 && i === 0">
+                  <img
+                    [src]="still.image_url"
+                    [alt]="project()!.title + ' - behind the scenes'"
+                    class="w-full object-cover transition-transform duration-500 hover:scale-105"
+                    [class.aspect-video]="bts().length === 3 && i === 0"
+                    [class.aspect-[4/3]]="!(bts().length === 3 && i === 0)"
+                    loading="lazy"
+                  />
                 </div>
               }
             </div>
           </div>
         }
 
-        <!-- Related projects -->
+        <!-- ── MORE WORK ── -->
         @if (related().length > 0) {
           <div class="px-6 md:px-10 py-16 max-w-7xl mx-auto" style="border-top: 1px solid var(--gz-border);">
             <h2 appReveal class="text-4xl mb-10" style="color: var(--gz-text);">MORE WORK</h2>
@@ -109,10 +130,17 @@ import type { Project } from 'shared';
                   <div class="aspect-[4/3] overflow-hidden" style="background: var(--gz-surface);">
                     @if (p.thumbnail_url) {
                       <img [src]="p.thumbnail_url" [alt]="p.title" class="w-full h-full object-cover" loading="lazy" />
+                    } @else {
+                      <div class="w-full h-full flex items-center justify-center" style="background: var(--gz-surface2);">
+                        <span style="color: var(--gz-border); font-family: 'Bebas Neue', sans-serif;">GZP</span>
+                      </div>
                     }
                   </div>
                   <div class="card-overlay">
                     <div class="absolute bottom-0 left-0 p-4">
+                      @if (p.director) {
+                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ p.director.name }}</p>
+                      }
                       <p class="text-lg" style="color: var(--gz-text); font-family: 'Bebas Neue', sans-serif;">{{ p.title }}</p>
                     </div>
                   </div>
@@ -136,11 +164,15 @@ export class ProjectDetailComponent implements OnInit {
   related = signal<Project[]>([]);
   loading = signal(true);
 
+  bts() {
+    return (this.project()?.stills ?? []).slice(0, 4);
+  }
+
   vimeoUrl(): SafeResourceUrl {
     const id = this.project()?.vimeo_id;
     if (!id) return '';
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${id}?autoplay=1&title=0&byline=0&portrait=0`
+      `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0&portrait=0&badge=0&autopause=0`
     );
   }
 

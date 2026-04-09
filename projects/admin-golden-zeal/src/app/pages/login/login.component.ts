@@ -12,7 +12,7 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
       <div class="w-full max-w-sm space-y-8">
         <!-- Logo -->
         <div class="text-center">
-          <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto mx-auto mb-2" />
+          <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto mx-auto mb-2" style="filter: brightness(0) invert(1);" />
           <p class="text-xs tracking-[0.3em] uppercase" style="color: #888880;">CMS Admin</p>
         </div>
 

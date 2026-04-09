@@ -10,6 +10,7 @@ import type {
   FaqItem,
   SiteSetting,
   Showreel,
+  ApprenticeshipCohort,
 } from 'shared';
 
 @Injectable({ providedIn: 'root' })
@@ -132,6 +133,37 @@ export class ContentService {
         return settings;
       })
     );
+  }
+
+  // ── Apprenticeship Cohorts ─────────────────────────────────
+  getCohorts(): Observable<ApprenticeshipCohort[]> {
+    return from(
+      this.sb.from('apprenticeship_cohorts').select('*').order('display_order', { ascending: true })
+    ).pipe(map((r) => (r.data as ApprenticeshipCohort[]) ?? []));
+  }
+
+  getCohortBySlug(slug: string): Observable<ApprenticeshipCohort | null> {
+    return from(
+      this.sb.from('apprenticeship_cohorts').select('*').eq('slug', slug).maybeSingle()
+    ).pipe(map((r) => (r.data as ApprenticeshipCohort) ?? null));
+  }
+
+  getCohortProjects(cohortId: string): Observable<Project[]> {
+    return from(
+      this.sb
+        .from('cohort_projects')
+        .select('project:projects(*, director:directors(id,name,slug), photographer:photographers(id,name,slug))')
+        .eq('cohort_id', cohortId)
+    ).pipe(map((r) => ((r.data as any[]) ?? []).map((row: any) => row.project).filter(Boolean)));
+  }
+
+  getCohortMembers(cohortId: string): Observable<{ role: string; member: TeamMember }[]> {
+    return from(
+      this.sb
+        .from('cohort_members')
+        .select('role, team_member:team_members(*)')
+        .eq('cohort_id', cohortId)
+    ).pipe(map((r) => ((r.data as any[]) ?? []).map((row: any) => ({ role: row.role, member: row.team_member }))));
   }
 
   // ── Showreel ───────────────────────────────────────────────

@@ -8,8 +8,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   template: `
     <header
       class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      [class.bg-gz-black]="scrolled()"
-      [style.background-color]="scrolled() ? '#0f0f0f' : 'transparent'"
+      [style.background-color]="scrolled() ? '#0a150f' : 'transparent'"
       [style.border-bottom]="scrolled() ? '1px solid rgba(240,235,224,0.08)' : 'none'"
     >
       <!-- Scroll progress bar -->
@@ -20,25 +19,38 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       ></div>
 
       <div class="flex items-center justify-between px-6 md:px-10 py-4">
-        <!-- Logo -->
+
+        <!-- Logo — forced white via filter -->
         <a routerLink="/" class="shrink-0 z-50">
           <img
             src="assets/brand/full_logo.png"
             alt="Golden Zeal Pictures"
             class="h-8 md:h-9 w-auto"
+            style=""
           />
         </a>
 
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-8">
-          <!-- WORK dropdown -->
+
+          <!-- Commercial -->
+          <a routerLink="/commercial" routerLinkActive="!text-[#C9A04A]"
+             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             style="color: var(--gz-muted);">COMMERCIAL</a>
+
+          <!-- Cinematic -->
+          <a routerLink="/cinematic" routerLinkActive="!text-[#C9A04A]"
+             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             style="color: var(--gz-muted);">CINEMATIC</a>
+
+          <!-- Crew dropdown -->
           <div class="relative group">
             <button
               type="button"
               class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200 flex items-center gap-1"
               style="color: var(--gz-muted);"
             >
-              WORK
+              CREW
               <svg width="10" height="6" viewBox="0 0 10 6" fill="none" class="transition-transform duration-200 group-hover:rotate-180">
                 <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
@@ -47,22 +59,21 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               class="absolute top-full left-0 mt-3 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
               style="background: var(--gz-surface); border: 1px solid var(--gz-border);"
             >
-              <a
-                routerLink="/commercial"
-                class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200"
-                style="color: var(--gz-muted);"
-              >Commercial</a>
-              <a
-                routerLink="/cinematic"
-                class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200"
-                style="color: var(--gz-muted);"
-              >Cinematic</a>
+              <a routerLink="/crew"
+                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
+                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">The Team</a>
+              <a routerLink="/directors"
+                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
+                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">Directors</a>
+              <a routerLink="/photographers"
+                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
+                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">Photographers</a>
+              <a routerLink="/apprenticeship"
+                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
+                 style="color: var(--gz-gold);">Apprenticeship</a>
             </div>
           </div>
 
-          <a routerLink="/directors"     routerLinkActive="text-gz-gold" class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200" style="color: var(--gz-muted);">DIRECTORS</a>
-          <a routerLink="/photographers" routerLinkActive="text-gz-gold" class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200" style="color: var(--gz-muted);">PHOTOGRAPHERS</a>
-          <a routerLink="/crew"          routerLinkActive="text-gz-gold" class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200" style="color: var(--gz-muted);">CREW</a>
           <a routerLink="/contact" class="btn-gold text-[0.7rem] py-2 px-4">CONTACT</a>
         </nav>
 
@@ -91,8 +102,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
               <a
                 [routerLink]="item.path"
                 (click)="mobileOpen.set(false)"
-                class="text-5xl transition-colors duration-200 hover:opacity-100"
+                class="transition-colors duration-200"
                 style="color: var(--gz-muted); font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em;"
+                [style.font-size]="item.sub ? '2.5rem' : '3.5rem'"
+                [style.padding-left]="item.sub ? '1.5rem' : '0'"
+                [style.color]="item.sub ? 'var(--gz-muted)' : 'var(--gz-text)'"
               >{{ item.label }}</a>
             }
           </nav>
@@ -113,13 +127,13 @@ export class AppHeaderComponent {
   scrollProgress = signal(0);
 
   readonly mobileNav = [
-    { path: '/',              label: 'HOME' },
-    { path: '/commercial',    label: 'COMMERCIAL' },
-    { path: '/cinematic',     label: 'CINEMATIC' },
-    { path: '/directors',     label: 'DIRECTORS' },
-    { path: '/photographers', label: 'PHOTOGRAPHERS' },
-    { path: '/crew',          label: 'CREW' },
-    { path: '/contact',       label: 'CONTACT' },
+    { path: '/commercial',    label: 'COMMERCIAL',    sub: false },
+    { path: '/cinematic',     label: 'CINEMATIC',     sub: false },
+    { path: '/crew',          label: 'CREW',          sub: false },
+    { path: '/directors',     label: 'DIRECTORS',     sub: true  },
+    { path: '/photographers', label: 'PHOTOGRAPHERS', sub: true  },
+    { path: '/apprenticeship', label: 'APPRENTICESHIP', sub: true  },
+    { path: '/contact',       label: 'CONTACT',        sub: false },
   ];
 
   @HostListener('window:scroll')

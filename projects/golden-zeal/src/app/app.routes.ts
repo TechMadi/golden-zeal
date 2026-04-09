@@ -54,6 +54,16 @@ export const routes: Routes = [
       import('./pages/contact/contact.component').then((m) => m.ContactComponent),
   },
   {
+    path: 'apprenticeship',
+    loadComponent: () =>
+      import('./pages/apprenticeship/apprenticeship.component').then((m) => m.ApprenticeshipComponent),
+  },
+  {
+    path: 'apprenticeship/:slug',
+    loadComponent: () =>
+      import('./pages/apprenticeship/apprenticeship-detail.component').then((m) => m.ApprenticeshipDetailComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

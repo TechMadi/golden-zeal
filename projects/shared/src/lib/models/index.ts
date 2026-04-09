@@ -24,6 +24,7 @@ export interface Project {
   title: string;
   slug: string;
   client: string | null;
+  description: string | null;
   category: 'commercial' | 'cinematic' | 'music_video' | 'stills';
   year: number | null;
   director_id: string | null;
@@ -78,6 +79,29 @@ export interface FaqItem {
   question: string;
   answer: string;
   display_order: number;
+}
+
+export interface ApprenticeshipCohort {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  year: number | null;
+  cohort_number: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  enrolled_count: number;
+  status: 'upcoming' | 'active' | 'completed';
+  display_order: number;
+  // joined
+  projects?: Project[];
+  members?: CohortMember[];
+}
+
+export interface CohortMember {
+  team_member_id: string;
+  role: string;
+  team_member?: TeamMember;
 }
 
 export interface SiteSetting {

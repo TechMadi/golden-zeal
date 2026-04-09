@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
           <!-- Brand -->
           <div class="space-y-4">
-            <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto" />
+            <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto" style="filter: brightness(0) invert(1);" />
             <p class="text-sm leading-relaxed max-w-xs" style="color: var(--gz-muted);">
               Film &amp; Television Production Across Africa and Beyond.
             </p>
@@ -30,7 +30,7 @@ import { RouterLink } from '@angular/router';
             <p class="text-xs tracking-[0.2em] uppercase mb-5" style="color: var(--gz-gold);">Get In Touch</p>
             <p class="text-sm" style="color: var(--gz-muted);">Nairobi, Kenya</p>
             <a href="tel:+254722833358" class="block text-sm transition-colors" style="color: var(--gz-muted);">+254 722 833 358</a>
-            <a href="mailto:rodgers@goldenzealpictures.co.ke" class="block text-sm transition-colors" style="color: var(--gz-muted);">rodgers&#64;goldenzealpictures.co.ke</a>
+            <a href="mailto:info@goldenzealpictures.co.ke" class="block text-sm transition-colors" style="color: var(--gz-muted);">info&#64;goldenzealpictures.co.ke</a>
             <div class="flex gap-5 pt-2">
               @for (social of socials; track social.label) {
                 <a [href]="social.href" target="_blank" rel="noopener"
@@ -60,7 +60,8 @@ export class AppFooterComponent {
     { path: '/directors',     label: 'Directors' },
     { path: '/photographers', label: 'Photographers' },
     { path: '/crew',          label: 'Crew' },
-    { path: '/contact',       label: 'Contact' },
+    { path: '/apprenticeship', label: 'Apprenticeship' },
+    { path: '/contact',        label: 'Contact' },
   ];
 
   readonly socials = [

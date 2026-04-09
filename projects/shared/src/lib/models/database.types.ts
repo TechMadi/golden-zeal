@@ -138,6 +138,7 @@ export type Database = {
           category: string
           client: string | null
           created_at: string | null
+          description: string | null
           director_id: string | null
           display_order: number
           featured: boolean
@@ -153,6 +154,7 @@ export type Database = {
           category: string
           client?: string | null
           created_at?: string | null
+          description?: string | null
           director_id?: string | null
           display_order?: number
           featured?: boolean
@@ -168,6 +170,7 @@ export type Database = {
           category?: string
           client?: string | null
           created_at?: string | null
+          description?: string | null
           director_id?: string | null
           display_order?: number
           featured?: boolean
