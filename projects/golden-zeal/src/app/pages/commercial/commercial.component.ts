@@ -118,7 +118,7 @@ const FILTERS = ['ALL', 'TVC', 'MUSIC VIDEO', 'CORPORATE'] as const;
       <div class="pt-32 pb-16 px-6 md:px-10">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div class="relative">
-            <h1 style="font-size: clamp(4rem, 14vw, 10rem); color: var(--gz-text); line-height: 0.9; letter-spacing: -0.02em;">
+            <h1 appReveal style="font-size: clamp(4rem, 14vw, 10rem); color: var(--gz-text); line-height: 0.9; letter-spacing: -0.02em;">
               COMMER<br />CIALS
             </h1>
             @if (!loading()) {

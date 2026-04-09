@@ -115,7 +115,7 @@ import type { Project } from 'shared';
       <div class="pt-32 pb-16 px-6 md:px-10">
         <div class="max-w-7xl mx-auto">
           <div class="relative inline-block">
-            <h1 style="font-size: clamp(4rem, 14vw, 10rem); color: var(--gz-text); line-height: 0.9; letter-spacing: -0.02em;">
+            <h1 appReveal style="font-size: clamp(4rem, 14vw, 10rem); color: var(--gz-text); line-height: 0.9; letter-spacing: -0.02em;">
               NARRA<br />TIVE
             </h1>
             @if (!loading()) {

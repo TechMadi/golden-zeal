@@ -199,6 +199,120 @@ export type Database = {
           },
         ]
       }
+      apprenticeship_cohorts: {
+        Row: {
+          cohort_number: number | null
+          created_at: string | null
+          description: string | null
+          display_order: number
+          end_date: string | null
+          enrolled_count: number
+          id: string
+          slug: string
+          start_date: string | null
+          status: string
+          title: string
+          year: number | null
+        }
+        Insert: {
+          cohort_number?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          enrolled_count?: number
+          id?: string
+          slug: string
+          start_date?: string | null
+          status?: string
+          title: string
+          year?: number | null
+        }
+        Update: {
+          cohort_number?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number
+          end_date?: string | null
+          enrolled_count?: number
+          id?: string
+          slug?: string
+          start_date?: string | null
+          status?: string
+          title?: string
+          year?: number | null
+        }
+        Relationships: []
+      }
+      cohort_members: {
+        Row: {
+          cohort_id: string
+          id: string
+          role: string
+          team_member_id: string
+        }
+        Insert: {
+          cohort_id: string
+          id?: string
+          role?: string
+          team_member_id: string
+        }
+        Update: {
+          cohort_id?: string
+          id?: string
+          role?: string
+          team_member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_members_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "apprenticeship_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohort_members_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohort_projects: {
+        Row: {
+          cohort_id: string
+          id: string
+          project_id: string
+        }
+        Insert: {
+          cohort_id: string
+          id?: string
+          project_id: string
+        }
+        Update: {
+          cohort_id?: string
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_projects_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "apprenticeship_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohort_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regional_reps: {
         Row: {
           display_order: number
