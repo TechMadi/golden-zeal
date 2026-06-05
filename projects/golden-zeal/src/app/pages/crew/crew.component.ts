@@ -65,15 +65,12 @@ import type { TeamMember } from 'shared';
                       </span>
                     </div>
                   }
-                  <!-- Hover overlay with contact -->
-                  @if (member.email) {
-                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4"
-                         style="background: rgba(15,15,15,0.85);">
-                      <a [href]="'mailto:' + member.email"
-                         class="text-xs tracking-widest uppercase transition-colors"
-                         style="color: var(--gz-gold);">{{ member.email }}</a>
-                    </div>
-                  }
+                  <!-- Hover overlay -->
+                  <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2 p-4"
+                       style="background: rgba(15,15,15,0.85);">
+                    <p class="text-base tracking-widest uppercase text-center" style="color: var(--gz-text);">{{ member.name }}</p>
+                    <p class="text-xs tracking-widest uppercase text-center" style="color: var(--gz-gold);">{{ member.role }}</p>
+                  </div>
                 </div>
                 <h3 class="text-lg mb-1" style="color: var(--gz-text);">{{ member.name }}</h3>
                 <p class="text-xs tracking-widest uppercase" style="color: var(--gz-muted);">{{ member.role }}</p>
