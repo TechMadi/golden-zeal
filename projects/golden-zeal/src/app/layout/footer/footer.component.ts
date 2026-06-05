@@ -57,8 +57,6 @@ export class AppFooterComponent {
   readonly navLinks = [
     { path: '/commercial',    label: 'Commercial' },
     { path: '/cinematic',     label: 'Cinematic' },
-    { path: '/directors',     label: 'Directors' },
-    { path: '/photographers', label: 'Photographers' },
     { path: '/crew',          label: 'Crew' },
     { path: '/apprenticeship', label: 'Apprenticeship' },
     { path: '/contact',        label: 'Contact' },
