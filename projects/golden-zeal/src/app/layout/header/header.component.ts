@@ -101,13 +101,10 @@ export class AppHeaderComponent {
   scrollProgress = signal(0);
 
   readonly mobileNav = [
-    { path: '/commercial',    label: 'COMMERCIAL',    sub: false },
-    { path: '/cinematic',     label: 'CINEMATIC',     sub: false },
-    { path: '/crew',          label: 'CREW',          sub: false },
-    { path: '/directors',     label: 'DIRECTORS',     sub: true  },
-    { path: '/photographers', label: 'PHOTOGRAPHERS', sub: true  },
-    { path: '/apprenticeship', label: 'APPRENTICESHIP', sub: true  },
-    { path: '/contact',       label: 'CONTACT',        sub: false },
+    { path: '/cinematic',  label: 'CINEMATIC',  sub: false },
+    { path: '/commercial', label: 'COMMERCIAL', sub: false },
+    { path: '/crew',       label: 'CREW',       sub: false },
+    { path: '/contact',    label: 'CONTACT',    sub: false },
   ];
 
   @HostListener('window:scroll')
