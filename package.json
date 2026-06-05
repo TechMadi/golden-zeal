@@ -17,6 +17,14 @@
     "deploy": "firebase deploy --only hosting"
   },
   "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract"
+    ]
+  },
   "dependencies": {
     "@angular/common": "^20.0.0",
     "@angular/compiler": "^20.0.0",
