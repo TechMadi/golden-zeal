@@ -1,8 +1,19 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
 import type { Director, Photographer } from 'shared';
+
+const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
+  commercial: [
+    { value: 'tvc',        label: 'TVC'        },
+    { value: 'animations', label: 'Animations' },
+  ],
+  cinematic: [
+    { value: 'commissioned',  label: 'Commissioned Work' },
+    { value: 'original_film', label: 'Original Film'     },
+  ],
+};
 
 @Component({
   selector: 'app-project-form',
@@ -23,15 +34,79 @@ import type { Director, Photographer } from 'shared';
         </div>
       }
 
+      @if (errorMsg()) {
+        <div class="p-3 mb-6 text-sm" style="background:rgba(220,50,50,0.1); border:1px solid #dc3232; color:#ff6b6b;">
+          {{ errorMsg() }}
+        </div>
+      }
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
-        @for (field of textFields; track field.name) {
-          <div>
-            <label [for]="field.name" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">{{ field.label }}</label>
-            <input [id]="field.name" [type]="field.type" [formControlName]="field.name"
-                   class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                   style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
-          </div>
-        }
+
+        <!-- Title -->
+        <div>
+          <label for="title" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Title *</label>
+          <input id="title" type="text" formControlName="title"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Slug -->
+        <div>
+          <label for="slug" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">
+            Slug * <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(auto-filled from title)</span>
+          </label>
+          <input id="slug" type="text" formControlName="slug"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Client -->
+        <div>
+          <label for="client" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Client</label>
+          <input id="client" type="text" formControlName="client"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Year -->
+        <div>
+          <label for="year" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Year</label>
+          <input id="year" type="number" formControlName="year"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Vimeo ID -->
+        <div>
+          <label for="vimeo_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Vimeo ID</label>
+          <input id="vimeo_id" type="text" formControlName="vimeo_id" placeholder="e.g. 123456789"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- YouTube ID -->
+        <div>
+          <label for="youtube_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">YouTube ID</label>
+          <input id="youtube_id" type="text" formControlName="youtube_id" placeholder="e.g. dQw4w9WgXcQ"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Thumbnail URL -->
+        <div>
+          <label for="thumbnail_url" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Thumbnail URL</label>
+          <input id="thumbnail_url" type="text" formControlName="thumbnail_url"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Display Order -->
+        <div>
+          <label for="display_order" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Display Order</label>
+          <input id="display_order" type="number" formControlName="display_order"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
 
         <!-- Description -->
         <div>
@@ -53,6 +128,20 @@ import type { Director, Photographer } from 'shared';
             <option value="stills">Stills</option>
           </select>
         </div>
+
+        <!-- Sub-category (shown only when options exist) -->
+        @if (subCategoryOptions().length > 0) {
+          <div>
+            <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Sub-category</label>
+            <select formControlName="sub_category" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                    style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#141414;">
+              <option value="">— None —</option>
+              @for (opt of subCategoryOptions(); track opt.value) {
+                <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+          </div>
+        }
 
         <!-- Director -->
         <div>
@@ -87,10 +176,15 @@ import type { Director, Photographer } from 'shared';
         <!-- Thumbnail upload -->
         <div>
           <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Thumbnail Image</label>
-          <input type="file" accept="image/*" (change)="onFileChange($event, 'thumbnail')"
+          <input type="file" accept="image/*" (change)="onFileChange($event)"
+                 [disabled]="uploadingImage()"
                  class="text-sm" style="color:#888880;" />
+          @if (uploadingImage()) {
+            <p class="mt-2 text-xs" style="color:#C9A04A;">Uploading image...</p>
+          }
           @if (form.get('thumbnail_url')?.value) {
             <img [src]="form.get('thumbnail_url')?.value" class="mt-3 h-24 object-cover" />
+            <p class="mt-1 text-xs break-all" style="color:#555;">{{ form.get('thumbnail_url')?.value }}</p>
           }
         </div>
 
@@ -115,71 +209,105 @@ export class ProjectFormComponent implements OnInit {
   isEdit = signal(false);
   saving = signal(false);
   saved = signal(false);
+  errorMsg = signal('');
+  uploadingImage = signal(false);
   directors = signal<Director[]>([]);
   photographers = signal<Photographer[]>([]);
+  selectedCategory = signal('commercial');
   private projectId = '';
 
-  readonly textFields = [
-    { name: 'title',         label: 'Title *',         type: 'text'   },
-    { name: 'slug',          label: 'Slug *',          type: 'text'   },
-    { name: 'client',        label: 'Client',          type: 'text'   },
-    { name: 'year',          label: 'Year',            type: 'number' },
-    { name: 'vimeo_id',      label: 'Vimeo ID',        type: 'text'   },
-    { name: 'thumbnail_url', label: 'Thumbnail URL',   type: 'text'   },
-    { name: 'display_order', label: 'Display Order',   type: 'number' },
-  ];
+  subCategoryOptions = computed(() => SUB_CATEGORIES[this.selectedCategory()] ?? []);
 
   form = this.fb.nonNullable.group({
-    title:          ['', Validators.required],
-    slug:           ['', Validators.required],
-    client:         [''],
-    description:    [''],
-    year:           [new Date().getFullYear()],
-    category:       ['commercial', Validators.required],
-    director_id:    [''],
-    photographer_id:[''],
-    vimeo_id:       [''],
-    thumbnail_url:  [''],
-    featured:       [false],
-    display_order:  [0],
+    title:           ['', Validators.required],
+    slug:            ['', Validators.required],
+    client:          [''],
+    description:     [''],
+    year:            [new Date().getFullYear()],
+    category:        ['commercial', Validators.required],
+    sub_category:    [''],
+    director_id:     [''],
+    photographer_id: [''],
+    vimeo_id:        [''],
+    youtube_id:      [''],
+    thumbnail_url:   [''],
+    featured:        [false],
+    display_order:   [0],
   });
 
   ngOnInit(): void {
     this.admin.list<Director>('directors').subscribe((d) => this.directors.set(d));
     this.admin.list<Photographer>('photographers').subscribe((p) => this.photographers.set(p));
 
+    // Auto-generate slug from title (new projects only)
+    this.form.get('title')!.valueChanges.subscribe((title) => {
+      if (!this.isEdit()) {
+        const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        this.form.patchValue({ slug }, { emitEvent: false });
+      }
+    });
+
+    // Track category for sub-category options, clear sub_category on change
+    this.form.get('category')!.valueChanges.subscribe((cat) => {
+      this.selectedCategory.set(cat);
+      this.form.patchValue({ sub_category: '' }, { emitEvent: false });
+    });
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id && id !== 'new') {
       this.isEdit.set(true);
       this.projectId = id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       this.admin.get<any>('projects', id).subscribe((p) => {
-        if (p) this.form.patchValue(p);
+        if (p) {
+          this.selectedCategory.set(p.category ?? 'commercial');
+          this.form.patchValue(p);
+        }
       });
     }
   }
 
-  async onFileChange(event: Event, field: string): Promise<void> {
+  async onFileChange(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-    const path = `thumbnails/${Date.now()}-${file.name}`;
-    const url = await this.admin.uploadImage('media', path, file);
-    this.form.patchValue({ thumbnail_url: url });
+    this.uploadingImage.set(true);
+    try {
+      const path = `thumbnails/${Date.now()}-${file.name}`;
+      const url = await this.admin.uploadImage('media', path, file);
+      this.form.patchValue({ thumbnail_url: url });
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? 'Upload failed';
+      this.errorMsg.set(msg);
+    } finally {
+      this.uploadingImage.set(false);
+    }
   }
 
   onSubmit(): void {
     if (this.form.invalid || this.saving()) return;
     this.saving.set(true);
-    const data = { ...this.form.getRawValue() };
+    this.errorMsg.set('');
+
+    // Convert empty strings to null for optional fields
+    const data = Object.fromEntries(
+      Object.entries(this.form.getRawValue()).map(([k, v]) => [k, v === '' ? null : v])
+    );
+
     const obs = this.isEdit()
       ? this.admin.update('projects', this.projectId, data)
       : this.admin.create('projects', data);
+
     obs.subscribe({
       next: () => {
         this.saving.set(false);
         this.saved.set(true);
         setTimeout(() => this.router.navigate(['/projects']), 1000);
       },
-      error: () => this.saving.set(false),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? JSON.stringify(err);
+        this.errorMsg.set(`Save failed: ${msg}`);
+      },
     });
   }
 }

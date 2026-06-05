@@ -36,43 +36,17 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
           <!-- Commercial -->
           <a routerLink="/commercial" routerLinkActive="!text-[#C9A04A]"
              class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
-             style="color: var(--gz-muted);">COMMERCIAL</a>
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">COMMERCIAL</a>
 
           <!-- Cinematic -->
           <a routerLink="/cinematic" routerLinkActive="!text-[#C9A04A]"
              class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
-             style="color: var(--gz-muted);">CINEMATIC</a>
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">CINEMATIC</a>
 
-          <!-- Crew dropdown -->
-          <div class="relative group">
-            <button
-              type="button"
-              class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200 flex items-center gap-1"
-              style="color: var(--gz-muted);"
-            >
-              CREW
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" class="transition-transform duration-200 group-hover:rotate-180">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
-            </button>
-            <div
-              class="absolute top-full left-0 mt-3 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
-              style="background: var(--gz-surface); border: 1px solid var(--gz-border);"
-            >
-              <a routerLink="/crew"
-                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
-                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">The Team</a>
-              <a routerLink="/directors"
-                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
-                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">Directors</a>
-              <a routerLink="/photographers"
-                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
-                 style="color: var(--gz-muted); border-bottom: 1px solid var(--gz-border);">Photographers</a>
-              <a routerLink="/apprenticeship"
-                 class="block px-5 py-3 text-xs tracking-[0.14em] uppercase transition-colors duration-200 hover:opacity-80"
-                 style="color: var(--gz-gold);">Apprenticeship</a>
-            </div>
-          </div>
+          <!-- Crew -->
+          <a routerLink="/crew" routerLinkActive="!text-[#C9A04A]"
+             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">CREW</a>
 
           <a routerLink="/contact" class="btn-gold text-[0.7rem] py-2 px-4">CONTACT</a>
         </nav>

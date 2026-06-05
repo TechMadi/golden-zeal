@@ -28,10 +28,10 @@ import type { Project } from 'shared';
 
         <!-- ── VIDEO HERO ── -->
         <div class="w-full pt-16" style="background: #000;">
-          @if (project()!.vimeo_id) {
+          @if (project()!.vimeo_id || project()!.youtube_id) {
             <div class="aspect-video w-full">
               <iframe
-                [src]="vimeoUrl()"
+                [src]="videoUrl()"
                 class="w-full h-full"
                 frameborder="0"
                 allow="autoplay; fullscreen; picture-in-picture"
@@ -168,11 +168,16 @@ export class ProjectDetailComponent implements OnInit {
     return (this.project()?.stills ?? []).slice(0, 4);
   }
 
-  vimeoUrl(): SafeResourceUrl {
-    const id = this.project()?.vimeo_id;
-    if (!id) return '';
+  videoUrl(): SafeResourceUrl {
+    const p = this.project();
+    if (!p) return '';
+    if (p.youtube_id) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${p.youtube_id}?autoplay=1&rel=0&modestbranding=1`
+      );
+    }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0&portrait=0&badge=0&autopause=0`
+      `https://player.vimeo.com/video/${p.vimeo_id}?autoplay=1&loop=1&title=0&byline=0&portrait=0&badge=0&autopause=0`
     );
   }
 

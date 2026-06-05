@@ -7,7 +7,7 @@ import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
 import type { Project } from 'shared';
 
-const FILTERS = ['ALL', 'TVC', 'MUSIC VIDEO', 'CORPORATE'] as const;
+const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
 
 @Component({
   selector: 'app-commercial',
@@ -166,14 +166,14 @@ const FILTERS = ['ALL', 'TVC', 'MUSIC VIDEO', 'CORPORATE'] as const;
                 [class.aspect-hero]="isHero(i)"
                 [class.aspect-half]="!isHero(i)"
               >
-                @if (isHero(i) && project.vimeo_id) {
+                @if (isHero(i) && hasVideo(project)) {
                   <!-- Background video for hero cards -->
                   @if (project.thumbnail_url) {
                     <img [src]="project.thumbnail_url" [alt]="project.title" loading="lazy" />
                   }
                   <div class="bg-video-wrap">
                     <iframe
-                      [src]="bgVideoSrc(project.vimeo_id)"
+                      [src]="bgVideoSrc(project)"
                       frameborder="0"
                       allow="autoplay; fullscreen"
                       title=""
@@ -221,29 +221,35 @@ export class CommercialComponent implements OnInit {
 
   isHero(i: number): boolean { return i % 5 === 0; }
 
-  bgVideoSrc(id: string): SafeResourceUrl {
+  bgVideoSrc(project: Project): SafeResourceUrl {
+    if (project.youtube_id) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${project.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${project.youtube_id}&controls=0&disablekb=1&modestbranding=1`
+      );
+    }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1`
+      `https://player.vimeo.com/video/${project.vimeo_id}?background=1&autoplay=1&loop=1&muted=1`
     );
+  }
+
+  hasVideo(project: Project): boolean {
+    return !!(project.vimeo_id || project.youtube_id);
   }
 
   visible = computed(() => {
     const f = this.activeFilter();
     if (f === 'ALL') return this.projects();
-    const map: Record<string, string[]> = {
-      'TVC':         ['commercial'],
-      'MUSIC VIDEO': ['music_video'],
-      'CORPORATE':   ['commercial'],
+    const subMap: Record<string, string> = {
+      'TVC':        'tvc',
+      'ANIMATIONS': 'animations',
     };
-    return this.projects().filter((p) => (map[f] ?? []).includes(p.category));
+    return this.projects().filter((p) => p.sub_category === subMap[f]);
   });
 
   ngOnInit(): void {
     this.content.getProjects('commercial').subscribe((p) => {
-      this.content.getProjects('music_video').subscribe((mv) => {
-        this.projects.set([...p, ...mv]);
-        this.loading.set(false);
-      });
+      this.projects.set(p);
+      this.loading.set(false);
     });
   }
 }

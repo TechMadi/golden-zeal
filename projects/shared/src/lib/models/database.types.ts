@@ -148,6 +148,8 @@ export type Database = {
           thumbnail_url: string | null
           title: string
           vimeo_id: string | null
+          youtube_id: string | null
+          sub_category: string | null
           year: number | null
         }
         Insert: {
@@ -161,9 +163,11 @@ export type Database = {
           id?: string
           photographer_id?: string | null
           slug: string
+          sub_category?: string | null
           thumbnail_url?: string | null
           title: string
           vimeo_id?: string | null
+          youtube_id?: string | null
           year?: number | null
         }
         Update: {
@@ -177,9 +181,11 @@ export type Database = {
           id?: string
           photographer_id?: string | null
           slug?: string
+          sub_category?: string | null
           thumbnail_url?: string | null
           title?: string
           vimeo_id?: string | null
+          youtube_id?: string | null
           year?: number | null
         }
         Relationships: [
@@ -370,21 +376,24 @@ export type Database = {
           id: string
           thumbnail_url: string | null
           title: string | null
-          vimeo_id: string
+          vimeo_id: string | null
+          youtube_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           thumbnail_url?: string | null
           title?: string | null
-          vimeo_id: string
+          vimeo_id?: string | null
+          youtube_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           thumbnail_url?: string | null
           title?: string | null
-          vimeo_id?: string
+          vimeo_id?: string | null
+          youtube_id?: string | null
         }
         Relationships: []
       }

@@ -20,7 +20,7 @@ import type { Project, Showreel } from 'shared';
       @if (showreel()) {
         <div class="hero-video-container absolute inset-0">
           <iframe
-            [src]="vimeoSrc()"
+            [src]="showreelSrc()"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             title="Golden Zeal Pictures Showreel"
@@ -32,7 +32,7 @@ import type { Project, Showreel } from 'shared';
       }
 
       <!-- Dark overlay -->
-      <div class="absolute inset-0" style="background: rgba(0,0,0,0.55);"></div>
+      <div class="absolute inset-0" style="background: rgba(0,0,0,0.35);"></div>
 
       <!-- Hero content -->
       <div class="relative z-10 h-full flex flex-col justify-end pb-16 md:pb-24 px-6 md:px-10">
@@ -195,9 +195,14 @@ export class HomeComponent implements OnInit {
     { path: '/cinematic',  label: 'CINEMATIC'  },
   ];
 
-  vimeoSrc(): SafeResourceUrl {
+  showreelSrc(): SafeResourceUrl {
     const s = this.showreel();
     if (!s) return '';
+    if (s.youtube_id) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${s.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${s.youtube_id}&controls=0&disablekb=1&modestbranding=1&playsinline=1`
+      );
+    }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
       `https://player.vimeo.com/video/${s.vimeo_id}?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0`
     );

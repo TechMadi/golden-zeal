@@ -26,11 +26,13 @@ export interface Project {
   client: string | null;
   description: string | null;
   category: 'commercial' | 'cinematic' | 'music_video' | 'stills';
+  sub_category: string | null;
   year: number | null;
   director_id: string | null;
   photographer_id: string | null;
   thumbnail_url: string | null;
   vimeo_id: string | null;
+  youtube_id: string | null;
   featured: boolean;
   display_order: number;
   // joined
@@ -111,7 +113,8 @@ export interface SiteSetting {
 
 export interface Showreel {
   id: string;
-  vimeo_id: string;
+  vimeo_id: string | null;
+  youtube_id: string | null;
   thumbnail_url: string | null;
   title: string | null;
 }

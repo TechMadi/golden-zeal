@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
 import type { Showreel } from 'shared';
 
@@ -12,16 +12,23 @@ import type { Showreel } from 'shared';
       <h1 class="text-3xl mb-4" style="font-family:'Bebas Neue',sans-serif;color:#F0EBE0;">SHOWREEL</h1>
       <p class="text-sm mb-8" style="color:#888880;">
         The active showreel plays as the full-screen background video on the home page hero.
-        Enter only the Vimeo video ID (e.g. <span style="color:#C9A04A;">123456789</span>).
+        Enter either a Vimeo ID <span style="color:#C9A04A;">(e.g. 123456789)</span> or a YouTube ID
+        <span style="color:#C9A04A;">(e.g. dQw4w9WgXcQ)</span>. YouTube takes priority if both are filled.
       </p>
 
       @if (current()) {
         <div class="p-4 mb-8" style="background:#141414;border:1px solid rgba(240,235,224,0.07);">
           <p class="text-xs tracking-widest uppercase mb-2" style="color:#C9A04A;">Current Showreel</p>
           <p class="text-sm" style="color:#F0EBE0;">{{ current()!.title ?? 'Untitled' }}</p>
-          <p class="text-xs mt-1" style="color:#888880;">Vimeo ID: {{ current()!.vimeo_id }}</p>
-          <a [href]="'https://vimeo.com/' + current()!.vimeo_id" target="_blank" rel="noopener"
-             class="text-xs mt-2 inline-block" style="color:#C9A04A;">Preview on Vimeo ↗</a>
+          @if (current()!.youtube_id) {
+            <p class="text-xs mt-1" style="color:#888880;">YouTube ID: {{ current()!.youtube_id }}</p>
+            <a [href]="'https://www.youtube.com/watch?v=' + current()!.youtube_id" target="_blank" rel="noopener"
+               class="text-xs mt-2 inline-block" style="color:#C9A04A;">Preview on YouTube ↗</a>
+          } @else if (current()!.vimeo_id) {
+            <p class="text-xs mt-1" style="color:#888880;">Vimeo ID: {{ current()!.vimeo_id }}</p>
+            <a [href]="'https://vimeo.com/' + current()!.vimeo_id" target="_blank" rel="noopener"
+               class="text-xs mt-2 inline-block" style="color:#C9A04A;">Preview on Vimeo ↗</a>
+          }
         </div>
       }
 
@@ -29,9 +36,19 @@ import type { Showreel } from 'shared';
         <div class="p-3 mb-6 text-xs" style="background:rgba(201,160,74,0.1);border:1px solid #C9A04A;color:#C9A04A;">Showreel updated.</div>
       }
 
+      @if (errorMsg()) {
+        <div class="p-3 mb-6 text-xs" style="background:rgba(220,50,50,0.1);border:1px solid #dc3232;color:#ff6b6b;">{{ errorMsg() }}</div>
+      }
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
         <div>
-          <label for="vimeo_id" class="block text-xs tracking-widest uppercase mb-1" style="color:#888880;">Vimeo ID *</label>
+          <label for="youtube_id" class="block text-xs tracking-widest uppercase mb-1" style="color:#888880;">YouTube ID</label>
+          <input id="youtube_id" type="text" formControlName="youtube_id" placeholder="e.g. dQw4w9WgXcQ"
+                 class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                 style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+        <div>
+          <label for="vimeo_id" class="block text-xs tracking-widest uppercase mb-1" style="color:#888880;">Vimeo ID</label>
           <input id="vimeo_id" type="text" formControlName="vimeo_id" placeholder="e.g. 123456789"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
@@ -48,7 +65,8 @@ import type { Showreel } from 'shared';
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
         </div>
-        <button type="submit" [disabled]="form.invalid || saving()" class="px-6 py-2 text-xs uppercase tracking-widest" style="background:#C9A04A;color:#0f0f0f;">
+        <button type="submit" [disabled]="saving()" class="px-6 py-2 text-xs uppercase tracking-widest"
+                style="background:#C9A04A;color:#0f0f0f;">
           {{ saving() ? 'Saving...' : 'Set Active Showreel' }}
         </button>
       </form>
@@ -58,10 +76,15 @@ import type { Showreel } from 'shared';
 export class ShowreelAdminComponent implements OnInit {
   private readonly admin = inject(AdminSupabaseService);
   private readonly fb = inject(FormBuilder);
-  current = signal<Showreel | null>(null); saving = signal(false); saved = signal(false);
+
+  current = signal<Showreel | null>(null);
+  saving = signal(false);
+  saved = signal(false);
+  errorMsg = signal('');
 
   form = this.fb.nonNullable.group({
-    vimeo_id:      ['', Validators.required],
+    vimeo_id:      [''],
+    youtube_id:    [''],
     title:         [''],
     thumbnail_url: [''],
   });
@@ -70,23 +93,44 @@ export class ShowreelAdminComponent implements OnInit {
     this.admin.list<Showreel>('showreel').subscribe((rows) => {
       if (rows.length > 0) {
         this.current.set(rows[0]);
-        const { vimeo_id, title, thumbnail_url } = rows[0];
-        this.form.patchValue({ vimeo_id, title: title ?? '', thumbnail_url: thumbnail_url ?? '' });
+        const { vimeo_id, youtube_id, title, thumbnail_url } = rows[0];
+        this.form.patchValue({
+          vimeo_id:      vimeo_id      ?? '',
+          youtube_id:    youtube_id    ?? '',
+          title:         title         ?? '',
+          thumbnail_url: thumbnail_url ?? '',
+        });
       }
     });
   }
 
   onSubmit(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.saving()) return;
     this.saving.set(true);
-    const data = this.form.getRawValue();
+    this.errorMsg.set('');
+
+    const raw = this.form.getRawValue();
+    const data = Object.fromEntries(
+      Object.entries(raw).map(([k, v]) => [k, v === '' ? null : v])
+    );
+
     const c = this.current();
     const obs = c
       ? this.admin.update<Showreel>('showreel', c.id, data)
       : this.admin.create<Showreel>('showreel', data);
+
     obs.subscribe({
-      next: (s) => { this.current.set(s); this.saving.set(false); this.saved.set(true); setTimeout(() => this.saved.set(false), 2000); },
-      error: () => this.saving.set(false),
+      next: (s) => {
+        this.current.set(s);
+        this.saving.set(false);
+        this.saved.set(true);
+        setTimeout(() => this.saved.set(false), 2000);
+      },
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? JSON.stringify(err);
+        this.errorMsg.set(`Save failed: ${msg}`);
+      },
     });
   }
 }

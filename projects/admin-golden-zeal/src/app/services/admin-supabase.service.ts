@@ -19,7 +19,12 @@ export class AdminSupabaseService {
   private readonly sb: any = inject(SupabaseService).client;
 
   private q<T>(promise: Promise<AnyRecord>): Observable<T> {
-    return from(promise) as Observable<T>;
+    return (from(promise) as Observable<AnyRecord>).pipe(
+      map((r) => {
+        if (r['error']) throw new Error(r['error'].message ?? JSON.stringify(r['error']));
+        return r as T;
+      })
+    );
   }
 
   // ── Generic CRUD ───────────────────────────────────────────

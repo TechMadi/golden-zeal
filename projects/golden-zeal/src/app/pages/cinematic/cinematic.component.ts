@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
@@ -113,19 +113,34 @@ import type { Project } from 'shared';
 
       <!-- Page header -->
       <div class="pt-32 pb-16 px-6 md:px-10">
-        <div class="max-w-7xl mx-auto">
-          <div class="relative inline-block">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div class="relative">
             <h1 appReveal style="font-size: clamp(4rem, 14vw, 10rem); color: var(--gz-text); line-height: 0.9; letter-spacing: -0.02em;">
               NARRA<br />TIVE
             </h1>
             @if (!loading()) {
-              <span class="absolute top-0 -right-10 text-sm tabular-nums" style="color: var(--gz-muted);">{{ projects().length }}</span>
+              <span class="absolute top-0 -right-10 text-sm tabular-nums" style="color: var(--gz-muted);">{{ visible().length }}</span>
             }
           </div>
+          <div class="flex flex-col items-end gap-4">
+            <p class="text-sm max-w-xs text-right" style="color: var(--gz-muted);">
+              Narrative films, documentaries and short-form work that honours the richness of African storytelling.
+            </p>
+            <!-- Filters -->
+            <div class="flex flex-wrap gap-2 justify-end">
+              @for (f of filters; track f) {
+                <button
+                  type="button"
+                  (click)="activeFilter.set(f)"
+                  class="px-3 py-1 text-xs tracking-[0.15em] uppercase transition-all duration-200"
+                  [style.background]="activeFilter() === f ? 'var(--gz-gold)' : 'transparent'"
+                  [style.color]="activeFilter() === f ? 'var(--gz-black)' : 'var(--gz-muted)'"
+                  [style.border]="'1px solid ' + (activeFilter() === f ? 'var(--gz-gold)' : 'var(--gz-border)')"
+                >{{ f }}</button>
+              }
+            </div>
+          </div>
         </div>
-        <p class="mt-6 text-sm max-w-xl px-0" style="color: var(--gz-muted);">
-          Narrative films, documentaries and short-form work that honours the richness of African storytelling.
-        </p>
       </div>
 
       <!-- Mixed grid -->
@@ -136,11 +151,11 @@ import type { Project } from 'shared';
             <div class="card-half aspect-half skeleton"></div>
             <div class="card-half aspect-half skeleton"></div>
           </div>
-        } @else if (projects().length === 0) {
+        } @else if (visible().length === 0) {
           <p class="text-center py-24" style="color: var(--gz-muted);">No cinematic projects yet.</p>
         } @else {
           <div class="work-grid">
-            @for (project of projects(); track project.id; let i = $index) {
+            @for (project of visible(); track project.id; let i = $index) {
               <a
                 [routerLink]="['/projects', project.slug]"
                 class="work-card"
@@ -149,13 +164,13 @@ import type { Project } from 'shared';
                 [class.aspect-hero]="isHero(i)"
                 [class.aspect-half]="!isHero(i)"
               >
-                @if (isHero(i) && project.vimeo_id) {
+                @if (isHero(i) && hasVideo(project)) {
                   @if (project.thumbnail_url) {
                     <img [src]="project.thumbnail_url" [alt]="project.title" loading="lazy" />
                   }
                   <div class="bg-video-wrap">
                     <iframe
-                      [src]="bgVideoSrc(project.vimeo_id)"
+                      [src]="bgVideoSrc(project)"
                       frameborder="0"
                       allow="autoplay; fullscreen"
                       title=""
@@ -198,14 +213,35 @@ export class CinematicComponent implements OnInit {
 
   projects = signal<Project[]>([]);
   loading = signal(true);
+  activeFilter = signal('ALL');
+  readonly filters = ['ALL', 'COMMISSIONED', 'ORIGINAL FILM'];
 
   isHero(i: number): boolean { return i % 5 === 0; }
 
-  bgVideoSrc(id: string): SafeResourceUrl {
+  hasVideo(project: Project): boolean {
+    return !!(project.vimeo_id || project.youtube_id);
+  }
+
+  bgVideoSrc(project: Project): SafeResourceUrl {
+    if (project.youtube_id) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${project.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${project.youtube_id}&controls=0&disablekb=1&modestbranding=1`
+      );
+    }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${id}?background=1&autoplay=1&loop=1&muted=1`
+      `https://player.vimeo.com/video/${project.vimeo_id}?background=1&autoplay=1&loop=1&muted=1`
     );
   }
+
+  visible = computed(() => {
+    const f = this.activeFilter();
+    if (f === 'ALL') return this.projects();
+    const subMap: Record<string, string> = {
+      'COMMISSIONED':  'commissioned',
+      'ORIGINAL FILM': 'original_film',
+    };
+    return this.projects().filter((p) => p.sub_category === subMap[f]);
+  });
 
   ngOnInit(): void {
     this.content.getProjects('cinematic').subscribe((p) => {
