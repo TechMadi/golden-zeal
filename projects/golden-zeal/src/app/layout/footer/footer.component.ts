@@ -55,8 +55,8 @@ export class AppFooterComponent {
   readonly year = new Date().getFullYear();
 
   readonly navLinks = [
-    { path: '/commercial',    label: 'Commercial' },
     { path: '/cinematic',     label: 'Cinematic' },
+    { path: '/commercial',    label: 'Commercial' },
     { path: '/crew',          label: 'Crew' },
     { path: '/apprenticeship', label: 'Apprenticeship' },
     { path: '/contact',        label: 'Contact' },

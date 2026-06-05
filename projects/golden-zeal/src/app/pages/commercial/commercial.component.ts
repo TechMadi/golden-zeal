@@ -107,6 +107,7 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
       .work-grid { grid-template-columns: 1fr; gap: 12px; padding: 12px; }
       .card-full, .card-half { grid-column: 1 / -1; }
       .aspect-hero { aspect-ratio: 16 / 9; }
+      .bg-video-wrap { display: none; }
     }
   `],
   template: `
@@ -176,6 +177,7 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
                       [src]="bgVideoSrc(project)"
                       frameborder="0"
                       allow="autoplay; fullscreen"
+                      loading="lazy"
                       title=""
                     ></iframe>
                   </div>

@@ -33,19 +33,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-8">
 
-          <!-- Commercial -->
-          <a routerLink="/commercial" routerLinkActive="!text-[#C9A04A]"
-             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
-             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">COMMERCIAL</a>
-
           <!-- Cinematic -->
           <a routerLink="/cinematic" routerLinkActive="!text-[#C9A04A]"
-             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
              [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">CINEMATIC</a>
+
+          <!-- Commercial -->
+          <a routerLink="/commercial" routerLinkActive="!text-[#C9A04A]"
+             class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">COMMERCIAL</a>
 
           <!-- Crew -->
           <a routerLink="/crew" routerLinkActive="!text-[#C9A04A]"
-             class="text-xs tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
              [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">CREW</a>
 
           <a routerLink="/contact" class="btn-gold text-[0.7rem] py-2 px-4">CONTACT</a>

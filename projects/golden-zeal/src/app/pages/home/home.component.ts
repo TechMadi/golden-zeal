@@ -16,7 +16,14 @@ import type { Project, Showreel } from 'shared';
 
     <!-- ── HERO: Fullscreen video reel ── -->
     <section class="relative h-screen w-full overflow-hidden">
-      <!-- Vimeo background player -->
+      <!-- Poster image shown while video loads -->
+      @if (showreelPoster()) {
+        <div class="absolute inset-0 bg-cover bg-center" [style.background-image]="'url(' + showreelPoster() + ')'"></div>
+      } @else {
+        <div class="absolute inset-0" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);"></div>
+      }
+
+      <!-- Background video player (loads on top of poster) -->
       @if (showreel()) {
         <div class="hero-video-container absolute inset-0">
           <iframe
@@ -26,9 +33,6 @@ import type { Project, Showreel } from 'shared';
             title="Golden Zeal Pictures Showreel"
           ></iframe>
         </div>
-      } @else {
-        <!-- Fallback dark gradient -->
-        <div class="absolute inset-0" style="background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);"></div>
       }
 
       <!-- Dark overlay -->
@@ -204,8 +208,16 @@ export class HomeComponent implements OnInit {
       );
     }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${s.vimeo_id}?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0`
+      `https://player.vimeo.com/video/${s.vimeo_id}?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0&playsinline=1`
     );
+  }
+
+  showreelPoster(): string {
+    const s = this.showreel();
+    if (!s) return '';
+    if (s.thumbnail_url) return s.thumbnail_url;
+    if (s.youtube_id) return `https://img.youtube.com/vi/${s.youtube_id}/maxresdefault.jpg`;
+    return '';
   }
 
   ngOnInit(): void {
