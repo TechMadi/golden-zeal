@@ -378,6 +378,10 @@ export type Database = {
           title: string | null
           vimeo_id: string | null
           youtube_id: string | null
+          client: string | null
+          director: string | null
+          is_active: boolean
+          sort_order: number
         }
         Insert: {
           created_at?: string | null
@@ -386,6 +390,10 @@ export type Database = {
           title?: string | null
           vimeo_id?: string | null
           youtube_id?: string | null
+          client?: string | null
+          director?: string | null
+          is_active?: boolean
+          sort_order?: number
         }
         Update: {
           created_at?: string | null
@@ -394,6 +402,10 @@ export type Database = {
           title?: string | null
           vimeo_id?: string | null
           youtube_id?: string | null
+          client?: string | null
+          director?: string | null
+          is_active?: boolean
+          sort_order?: number
         }
         Relationships: []
       }
