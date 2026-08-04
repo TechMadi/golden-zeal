@@ -19,6 +19,7 @@ jobs:
           node-version: lts/*
       - run: npm i -g pnpm
       - run: pnpm install --ignore-scripts && pnpm build:shared && pnpm build:landing && pnpm build:admin
+      - run: cp -r dist/admin-golden-zeal/browser dist/golden-zeal/browser/crm
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
