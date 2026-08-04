@@ -167,9 +167,9 @@ export class ContentService {
   }
 
   // ── Showreel ───────────────────────────────────────────────
-  getShowreel(): Observable<Showreel | null> {
+  getShowreels(): Observable<Showreel[]> {
     return from(
-      this.sb.from('showreel').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle()
-    ).pipe(map((r) => (r.data as Showreel) ?? null));
+      this.sb.from('showreel').select('*').eq('is_active', true).order('sort_order', { ascending: true })
+    ).pipe(map((r) => (r.data as Showreel[]) ?? []));
   }
 }

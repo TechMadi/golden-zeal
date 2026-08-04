@@ -117,4 +117,8 @@ export interface Showreel {
   youtube_id: string | null;
   thumbnail_url: string | null;
   title: string | null;
+  client: string | null;
+  director: string | null;
+  is_active: boolean;
+  sort_order: number;
 }

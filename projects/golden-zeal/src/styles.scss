@@ -231,6 +231,19 @@ select:focus-visible {
   transition: transform 0.5s ease;
 }
 
+/* Showreel hero progress bar */
+@keyframes reel-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.reel-progress-bar {
+  height: 1px;
+  background: white;
+  width: 0%;
+  animation: reel-progress var(--reel-duration, 5s) linear forwards;
+}
+
 .project-card:hover img {
   transform: scale(1.04);
 }
