@@ -8,12 +8,12 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center px-4" style="background: #0f0f0f;">
+    <div class="min-h-screen flex items-center justify-center px-4" style="background: #0a150f;">
       <div class="w-full max-w-sm space-y-8">
         <!-- Logo -->
         <div class="text-center">
-          <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto mx-auto mb-2" style="filter: brightness(0) invert(1);" />
-          <p class="text-xs tracking-[0.3em] uppercase" style="color: #888880;">CMS Admin</p>
+          <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto mx-auto mb-2" />
+          <p class="text-xs tracking-[0.3em] uppercase" style="color: #8a9e90;">CMS Admin</p>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
@@ -24,7 +24,7 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
           }
 
           <div>
-            <label for="email" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color: #888880;">Email</label>
+            <label for="email" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color: #8a9e90;">Email</label>
             <input
               id="email" type="email" formControlName="email"
               class="w-full bg-transparent py-3 px-4 text-sm focus:outline-none"
@@ -34,7 +34,7 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
           </div>
 
           <div>
-            <label for="password" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color: #888880;">Password</label>
+            <label for="password" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color: #8a9e90;">Password</label>
             <input
               id="password" type="password" formControlName="password"
               class="w-full bg-transparent py-3 px-4 text-sm focus:outline-none"
@@ -46,7 +46,7 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
             type="submit"
             class="w-full py-3 text-sm tracking-[0.15em] uppercase font-medium transition-all duration-200"
             [disabled]="form.invalid || loading()"
-            style="background: #C9A04A; color: #0f0f0f;"
+            style="background: #C9A04A; color: #0a150f;"
             [style.opacity]="form.invalid || loading() ? '0.6' : '1'"
           >
             {{ loading() ? 'SIGNING IN...' : 'SIGN IN' }}

@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
           <!-- Brand -->
           <div class="space-y-4">
-            <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto" style="filter: brightness(0) invert(1);" />
+            <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto" />
             <p class="text-sm leading-relaxed max-w-xs" style="color: var(--gz-muted);">
               Film &amp; Television Production Across Africa and Beyond.
             </p>

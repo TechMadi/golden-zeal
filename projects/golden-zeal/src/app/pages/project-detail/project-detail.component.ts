@@ -106,6 +106,12 @@ import type { Project } from 'shared';
                   </a>
                 </div>
               }
+              @for (group of groupedCredits(); track group.role) {
+                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
+                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">{{ group.role }}</p>
+                  <p class="text-base" style="color: var(--gz-text);">{{ group.names.join(', ') }}</p>
+                </div>
+              }
               @if (project()!.client) {
                 <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Client</p>
@@ -208,6 +214,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
 
   bts() {
     return (this.project()?.stills ?? []).slice(0, 4);
+  }
+
+  groupedCredits(): { role: string; names: string[] }[] {
+    const credits = this.project()?.credits ?? [];
+    const groups: { role: string; names: string[] }[] = [];
+    for (const c of credits) {
+      const existing = groups.find((g) => g.role === c.role);
+      if (existing) existing.names.push(c.person_name);
+      else groups.push({ role: c.role, names: [c.person_name] });
+    }
+    return groups;
   }
 
   // Always starts muted so autoplay works across all browsers/iOS.

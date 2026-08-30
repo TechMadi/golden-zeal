@@ -29,13 +29,13 @@ const SETTING_KEYS = [
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5">
         @for (s of settingKeys; track s.key) {
           <div>
-            <label [for]="s.key" class="block text-xs tracking-widest uppercase mb-1" style="color:#888880;">{{ s.label }}</label>
+            <label [for]="s.key" class="block text-xs tracking-widest uppercase mb-1" style="color:#8a9e90;">{{ s.label }}</label>
             <input [id]="s.key" type="text" [formControlName]="s.key"
                    class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                    style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
           </div>
         }
-        <button type="submit" [disabled]="saving()" class="px-6 py-2 text-xs uppercase tracking-widest mt-4" style="background:#C9A04A;color:#0f0f0f;">
+        <button type="submit" [disabled]="saving()" class="px-6 py-2 text-xs uppercase tracking-widest mt-4" style="background:#C9A04A;color:#0a150f;">
           {{ saving() ? 'Saving...' : 'Save All Settings' }}
         </button>
       </form>

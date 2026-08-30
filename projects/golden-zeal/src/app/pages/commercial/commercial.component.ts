@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
@@ -215,6 +215,7 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
 export class CommercialComponent implements OnInit {
   private readonly content = inject(ContentService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly route = inject(ActivatedRoute);
 
   projects = signal<Project[]>([]);
   loading = signal(true);
@@ -249,6 +250,12 @@ export class CommercialComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const filterMap: Record<string, string> = { tvc: 'TVC', animations: 'ANIMATIONS' };
+    this.route.queryParamMap.subscribe((params) => {
+      const filter = params.get('filter');
+      this.activeFilter.set((filter && filterMap[filter.toLowerCase()]) || 'ALL');
+    });
+
     this.content.getProjects('commercial').subscribe((p) => {
       this.projects.set(p);
       this.loading.set(false);

@@ -5,7 +5,7 @@ import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
-import type { Project, Showreel } from 'shared';
+import type { Showreel } from 'shared';
 
 @Component({
   selector: 'app-home',
@@ -146,66 +146,6 @@ import type { Project, Showreel } from 'shared';
       </div>
     }
 
-    <!-- ── FEATURED WORK ── -->
-    <section class="py-20 md:py-28 px-6 md:px-10" style="background: var(--gz-black);">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex items-end justify-between mb-12">
-          <h2 appReveal class="text-5xl md:text-7xl" style="color: var(--gz-text);">FEATURED WORK</h2>
-          <a routerLink="/commercial" appReveal class="btn-outline hidden md:inline-flex">All Projects</a>
-        </div>
-
-        @if (loading()) {
-          <!-- Skeleton -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (i of [1,2,3]; track i) {
-              <div class="aspect-[4/3] skeleton rounded-sm"></div>
-            }
-          </div>
-        } @else {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (project of featured(); track project.id; let i = $index) {
-              <a
-                [routerLink]="['/projects', project.slug]"
-                class="project-card block"
-                [class.md:col-span-2]="i === 0"
-                appReveal
-                [class.reveal-delay-1]="i === 1"
-                [class.reveal-delay-2]="i === 2"
-              >
-                <div [class.aspect-video]="i === 0" [class.aspect-[4/3]]="i !== 0" class="overflow-hidden relative" style="background: var(--gz-surface);">
-                  @if (project.thumbnail_url) {
-                    <img
-                      [src]="project.thumbnail_url"
-                      [alt]="project.title"
-                      class="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                  } @else {
-                    <div class="w-full h-full flex flex-col items-center justify-center gap-3" style="background: var(--gz-surface2);">
-                      <span class="text-4xl md:text-6xl" style="color: var(--gz-border); font-family: 'Bebas Neue', sans-serif;">GZP</span>
-                      <span class="text-xs tracking-[0.2em] uppercase" style="color: var(--gz-muted);">{{ project.category }}</span>
-                    </div>
-                  }
-                </div>
-                <div class="card-overlay">
-                  <div class="absolute bottom-0 left-0 p-5">
-                    <p class="text-xs tracking-[0.2em] uppercase mb-1" style="color: var(--gz-gold);">{{ project.category }}</p>
-                    <p class="text-xl" style="color: var(--gz-text); font-family: 'Bebas Neue', sans-serif;">{{ project.title }}</p>
-                    @if (project.client) {
-                      <p class="text-xs mt-1" style="color: var(--gz-muted);">{{ project.client }}</p>
-                    }
-                  </div>
-                </div>
-              </a>
-            }
-          </div>
-          <div class="mt-8 md:hidden">
-            <a routerLink="/commercial" class="btn-outline w-full justify-center">All Projects</a>
-          </div>
-        }
-      </div>
-    </section>
-
     <!-- ── MISSION ── -->
     <section class="py-20 md:py-28 px-6 md:px-10" style="background: var(--gz-surface);">
       <div class="max-w-4xl mx-auto text-center">
@@ -214,10 +154,7 @@ import type { Project, Showreel } from 'shared';
           30 YEARS OF COMBINED<br />EXPERIENCE. ONE CONTINENT'S<br />STORIES.
         </h2>
         <p appReveal class="text-base md:text-lg leading-relaxed mb-10 reveal-delay-1" style="color: var(--gz-muted); max-width: 640px; margin-left: auto; margin-right: auto;">
-          Golden Zeal Pictures is a boutique Film and TV Technical Agency based in Nairobi, Kenya
-          operating across East, Central, West and Southern Africa — and beyond into Southeast Asia and India.
-          We supply film technology, technical services and skilled crew with solid credentials from
-          countless international and local productions.
+          {{ aboutText() }}
         </p>
         <div appReveal class="flex flex-wrap justify-center gap-4 reveal-delay-2">
           <a routerLink="/crew" class="btn-gold">Meet The Crew</a>
@@ -264,10 +201,14 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly content   = inject(ContentService);
   private readonly sanitizer = inject(DomSanitizer);
 
-  featured    = signal<Project[]>([]);
   reels       = signal<Showreel[]>([]);
-  loading     = signal(true);
   activeIndex = signal(0);
+  aboutText   = signal(
+    `Founded in 2019, Golden Zeal Pictures Ltd is an independent film production company based in
+    Nairobi, Kenya, specialising in cinematic scripted and unscripted storytelling. We've delivered
+    projects throughout East, Central, West and Southern Africa, and Southeast Asia — driven by a
+    simple belief: the most powerful stories are those that reveal the human spirit.`
+  );
   progressKey = signal(0);
   reelOpen    = signal(false);
 
@@ -352,13 +293,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.content.getFeaturedProjects().subscribe((projects) => {
-      this.featured.set(projects);
-      this.loading.set(false);
-    });
     this.content.getShowreels().subscribe((reels) => {
       this.reels.set(reels);
       if (reels.length > 1) this.startTimer();
+    });
+    this.content.getSettings().subscribe((settings) => {
+      if (settings['about_text']) this.aboutText.set(settings['about_text']);
     });
   }
 
