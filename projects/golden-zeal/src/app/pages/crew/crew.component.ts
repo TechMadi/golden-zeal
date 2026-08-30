@@ -23,14 +23,20 @@ import type { TeamMember } from 'shared';
             30 YEARS OF COMBINED<br />EXPERIENCE.<br />ONE CONTINENT'S STORIES.
           </h1>
           <p appReveal class="text-base md:text-lg leading-relaxed max-w-2xl reveal-delay-2" style="color: var(--gz-muted);">
-            Golden Zeal Pictures is a boutique Film and TV Technical Agency based in Nairobi, Kenya.
-            We supply film technology, technical services and skilled crew with solid credentials from
-            countless international and local productions across East, Central, West and Southern Africa —
-            and beyond into Southeast Asia and India.
+            Founded in 2019, Golden Zeal Pictures Ltd is an independent film production company based in
+            Nairobi, Kenya, specialising in cinematic scripted and unscripted storytelling that illuminate
+            remarkable people, cultures, cycles, and ideas. Since our inception, we have delivered projects
+            throughout East, Central, West, and Southern Africa, as well as Southeast Asia, working in
+            diverse cultural, social, and operational environments.
           </p>
           <p appReveal class="text-base md:text-lg leading-relaxed max-w-2xl mt-4 reveal-delay-3" style="color: var(--gz-muted);">
-            A fun bunch to work with but also very highly dedicated, focused, diligent and patient in our craft —
-            ready to tell your stories with excellence and dedication.
+            Our work is driven by a simple belief: the most powerful stories are those that reveal the human
+            spirit. Whether documenting cultural heritage, philanthropy, innovation, or personal transformation,
+            we seek to create films that endure beyond entertainment and leave a meaningful impact.
+          </p>
+          <p appReveal class="text-base md:text-lg leading-relaxed max-w-2xl mt-4 reveal-delay-3" style="color: var(--gz-muted);">
+            We live to tell stories that reveal the people behind history, ideas, and achievement; stories
+            that preserve heritage, celebrate human resilience, and inspire future generations.
           </p>
         </div>
       </div>

@@ -1,11 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { from, Observable, map } from 'rxjs';
 import { SupabaseService } from 'shared';
-import type { SiteSetting, Showreel } from 'shared';
+import type { SiteSetting, Showreel, ProjectCredit } from 'shared';
 
 type Table = 'directors' | 'photographers' | 'projects' | 'project_stills' |
-             'team_members' | 'regional_reps' | 'services' | 'faq' |
-             'site_settings' | 'showreel';
+             'project_credits' | 'team_members' | 'regional_reps' | 'services' |
+             'faq' | 'site_settings' | 'showreel';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
@@ -57,6 +57,13 @@ export class AdminSupabaseService {
     return this.q<AnyRecord>(
       this.sb.from(table).delete().eq('id', id)
     ).pipe(map(() => undefined));
+  }
+
+  // ── Project credits ────────────────────────────────────────
+  listCredits(projectId: string): Observable<ProjectCredit[]> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_credits').select('*').eq('project_id', projectId).order('display_order', { ascending: true })
+    ).pipe(map((r: AnyRecord) => (r['data'] as ProjectCredit[]) ?? []));
   }
 
   // ── Site settings (key-value) ──────────────────────────────

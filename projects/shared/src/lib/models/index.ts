@@ -39,6 +39,15 @@ export interface Project {
   director?: Pick<Director, 'id' | 'name' | 'slug'>;
   photographer?: Pick<Photographer, 'id' | 'name' | 'slug'>;
   stills?: ProjectStill[];
+  credits?: ProjectCredit[];
+}
+
+export interface ProjectCredit {
+  id: string;
+  project_id: string;
+  person_name: string;
+  role: string;
+  display_order: number;
 }
 
 export interface ProjectStill {

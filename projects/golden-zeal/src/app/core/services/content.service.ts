@@ -57,26 +57,24 @@ export class ContentService {
     return from(query).pipe(map((r) => (r.data as Project[]) ?? []));
   }
 
-  getFeaturedProjects(): Observable<Project[]> {
-    return from(
-      this.sb
-        .from('projects')
-        .select('*, director:directors(id,name,slug), photographer:photographers(id,name,slug)')
-        .eq('featured', true)
-        .order('display_order', { ascending: true })
-    ).pipe(map((r) => (r.data as Project[]) ?? []));
-  }
-
   getProjectBySlug(slug: string): Observable<Project | null> {
     return from(
       this.sb
         .from('projects')
         .select(
-          '*, director:directors(id,name,slug), photographer:photographers(id,name,slug), stills:project_stills(*)'
+          '*, director:directors(id,name,slug), photographer:photographers(id,name,slug), stills:project_stills(*), credits:project_credits(*)'
         )
         .eq('slug', slug)
         .maybeSingle()
-    ).pipe(map((r) => (r.data as Project) ?? null));
+    ).pipe(
+      map((r) => {
+        const project = r.data as Project | null;
+        if (project?.credits) {
+          project.credits = [...project.credits].sort((a, b) => a.display_order - b.display_order);
+        }
+        return project;
+      })
+    );
   }
 
   getProjectsByDirector(directorId: string): Observable<Project[]> {

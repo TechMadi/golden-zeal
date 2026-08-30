@@ -2,7 +2,26 @@ import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
-import type { Director, Photographer } from 'shared';
+import type { Director, Photographer, ProjectCredit } from 'shared';
+
+const CANONICAL_ROLES = [
+  'Director',
+  'DOP',
+  'Cinematographer',
+  'Producer',
+  'Client Producer',
+  'Grip',
+  'Lighting',
+  'Logistics',
+  'Production Assistant',
+  'Sound Engineer',
+  'DIT',
+  'Editor',
+  'Colorist',
+  'Graphics',
+  'Wardrobe',
+  'Talent Coordinator',
+];
 
 const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
   commercial: [
@@ -22,7 +41,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
   template: `
     <div class="p-6 md:p-10 max-w-2xl">
       <div class="flex items-center gap-4 mb-8">
-        <a routerLink="/projects" class="text-xs tracking-widest uppercase" style="color:#888880;">← Projects</a>
+        <a routerLink="/projects" class="text-xs tracking-widest uppercase" style="color:#8a9e90;">← Projects</a>
         <h1 class="text-3xl" style="font-family:'Bebas Neue',sans-serif; color:#F0EBE0;">
           {{ isEdit() ? 'EDIT PROJECT' : 'NEW PROJECT' }}
         </h1>
@@ -44,7 +63,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Title -->
         <div>
-          <label for="title" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Title *</label>
+          <label for="title" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Title *</label>
           <input id="title" type="text" formControlName="title"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -52,7 +71,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Slug -->
         <div>
-          <label for="slug" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">
+          <label for="slug" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">
             Slug * <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(auto-filled from title)</span>
           </label>
           <input id="slug" type="text" formControlName="slug"
@@ -62,7 +81,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Client -->
         <div>
-          <label for="client" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Client</label>
+          <label for="client" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Client</label>
           <input id="client" type="text" formControlName="client"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -70,7 +89,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Year -->
         <div>
-          <label for="year" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Year</label>
+          <label for="year" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Year</label>
           <input id="year" type="number" formControlName="year"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -78,7 +97,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Vimeo ID -->
         <div>
-          <label for="vimeo_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Vimeo ID</label>
+          <label for="vimeo_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Vimeo ID</label>
           <input id="vimeo_id" type="text" formControlName="vimeo_id" placeholder="e.g. 123456789"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -86,7 +105,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- YouTube ID -->
         <div>
-          <label for="youtube_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">YouTube ID</label>
+          <label for="youtube_id" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">YouTube ID</label>
           <input id="youtube_id" type="text" formControlName="youtube_id" placeholder="e.g. dQw4w9WgXcQ"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -94,7 +113,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Thumbnail URL -->
         <div>
-          <label for="thumbnail_url" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Thumbnail URL</label>
+          <label for="thumbnail_url" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Thumbnail URL</label>
           <input id="thumbnail_url" type="text" formControlName="thumbnail_url"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -102,7 +121,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Display Order -->
         <div>
-          <label for="display_order" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Display Order</label>
+          <label for="display_order" class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Display Order</label>
           <input id="display_order" type="number" formControlName="display_order"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
@@ -110,7 +129,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Description -->
         <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Description</label>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Description</label>
           <textarea formControlName="description" rows="4"
                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none resize-vertical"
                     style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);"
@@ -119,9 +138,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Category -->
         <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Category</label>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Category</label>
           <select formControlName="category" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#141414;">
+                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
             <option value="commercial">Commercial</option>
             <option value="cinematic">Cinematic</option>
             <option value="music_video">Music Video</option>
@@ -132,9 +151,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
         <!-- Sub-category (shown only when options exist) -->
         @if (subCategoryOptions().length > 0) {
           <div>
-            <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Sub-category</label>
+            <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Sub-category</label>
             <select formControlName="sub_category" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                    style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#141414;">
+                    style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
               <option value="">— None —</option>
               @for (opt of subCategoryOptions(); track opt.value) {
                 <option [value]="opt.value">{{ opt.label }}</option>
@@ -145,9 +164,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Director -->
         <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Director (optional)</label>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Director (optional)</label>
           <select formControlName="director_id" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#141414;">
+                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
             <option value="">— None —</option>
             @for (d of directors(); track d.id) {
               <option [value]="d.id">{{ d.name }}</option>
@@ -157,9 +176,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <!-- Photographer -->
         <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Photographer (optional)</label>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Photographer (optional)</label>
           <select formControlName="photographer_id" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#141414;">
+                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
             <option value="">— None —</option>
             @for (p of photographers(); track p.id) {
               <option [value]="p.id">{{ p.name }}</option>
@@ -167,18 +186,12 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
           </select>
         </div>
 
-        <!-- Featured -->
-        <div class="flex items-center gap-3">
-          <input id="featured" type="checkbox" formControlName="featured" class="w-4 h-4" />
-          <label for="featured" class="text-xs tracking-[0.2em] uppercase" style="color:#888880;">Featured on Homepage</label>
-        </div>
-
         <!-- Thumbnail upload -->
         <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#888880;">Thumbnail Image</label>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Thumbnail Image</label>
           <input type="file" accept="image/*" (change)="onFileChange($event)"
                  [disabled]="uploadingImage()"
-                 class="text-sm" style="color:#888880;" />
+                 class="text-sm" style="color:#8a9e90;" />
           @if (uploadingImage()) {
             <p class="mt-2 text-xs" style="color:#C9A04A;">Uploading image...</p>
           }
@@ -190,13 +203,61 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
 
         <div class="flex gap-4 pt-4">
           <button type="submit" [disabled]="form.invalid || saving()" class="px-6 py-2 text-sm tracking-widest uppercase transition-colors"
-                  style="background:#C9A04A; color:#0f0f0f;" [style.opacity]="saving() ? '0.6' : '1'">
+                  style="background:#C9A04A; color:#0a150f;" [style.opacity]="saving() ? '0.6' : '1'">
             {{ saving() ? 'Saving...' : 'Save' }}
           </button>
           <a routerLink="/projects" class="px-6 py-2 text-sm tracking-widest uppercase transition-colors"
-             style="border:1px solid rgba(240,235,224,0.1); color:#888880;">Cancel</a>
+             style="border:1px solid rgba(240,235,224,0.1); color:#8a9e90;">Cancel</a>
         </div>
       </form>
+
+      <!-- Crew Credits (Producer, Cinematographer, Grip, Editor, etc. — Director/Photographer above are separate) -->
+      @if (isEdit()) {
+        <div class="mt-12 pt-8" style="border-top:1px solid rgba(240,235,224,0.1);">
+          <h2 class="text-xl mb-6" style="font-family:'Bebas Neue',sans-serif; color:#F0EBE0;">CREW CREDITS</h2>
+
+          <div class="mb-6 space-y-2">
+            @for (c of credits(); track c.id) {
+              <div class="flex items-center justify-between p-3" style="background:#0f1f16; border:1px solid rgba(240,235,224,0.07);">
+                <div>
+                  <p class="text-sm" style="color:#F0EBE0;">{{ c.person_name }}</p>
+                  <p class="text-xs" style="color:#8a9e90;">{{ c.role }}</p>
+                </div>
+                <button type="button" (click)="deleteCredit(c.id)" class="text-xs uppercase" style="color:#8a9e90;">Delete</button>
+              </div>
+            }
+            @if (credits().length === 0) {
+              <p class="text-xs" style="color:#555;">No crew credits yet.</p>
+            }
+          </div>
+
+          <form [formGroup]="creditForm" (ngSubmit)="onAddCredit()" class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[160px]">
+              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Role</label>
+              <input type="text" formControlName="role" placeholder="e.g. Cinematographer"
+                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                     style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+            </div>
+            <div class="flex-1 min-w-[160px]">
+              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Person Name</label>
+              <input type="text" formControlName="person_name" placeholder="e.g. Paul Kanyiri"
+                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                     style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+            </div>
+            <div class="w-24">
+              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Order</label>
+              <input type="number" formControlName="display_order"
+                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                     style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+            </div>
+            <button type="submit" [disabled]="creditForm.invalid || savingCredit()"
+                    class="px-4 py-2 text-xs tracking-widest uppercase transition-colors"
+                    style="background:#C9A04A; color:#0a150f;" [style.opacity]="creditForm.invalid || savingCredit() ? '0.6' : '1'">
+              Add
+            </button>
+          </form>
+        </div>
+      }
     </div>
   `,
 })
@@ -214,6 +275,8 @@ export class ProjectFormComponent implements OnInit {
   directors = signal<Director[]>([]);
   photographers = signal<Photographer[]>([]);
   selectedCategory = signal('commercial');
+  credits = signal<ProjectCredit[]>([]);
+  savingCredit = signal(false);
   private projectId = '';
 
   subCategoryOptions = computed(() => SUB_CATEGORIES[this.selectedCategory()] ?? []);
@@ -231,8 +294,13 @@ export class ProjectFormComponent implements OnInit {
     vimeo_id:        [''],
     youtube_id:      [''],
     thumbnail_url:   [''],
-    featured:        [false],
     display_order:   [0],
+  });
+
+  creditForm = this.fb.nonNullable.group({
+    role:          ['', Validators.required],
+    person_name:   ['', Validators.required],
+    display_order: [0],
   });
 
   ngOnInit(): void {
@@ -264,7 +332,31 @@ export class ProjectFormComponent implements OnInit {
           this.form.patchValue(p);
         }
       });
+      this.loadCredits();
     }
+  }
+
+  loadCredits(): void {
+    this.admin.listCredits(this.projectId).subscribe((c) => this.credits.set(c));
+  }
+
+  onAddCredit(): void {
+    if (this.creditForm.invalid || this.savingCredit()) return;
+    this.savingCredit.set(true);
+    const data = { ...this.creditForm.getRawValue(), project_id: this.projectId };
+    this.admin.create('project_credits', data).subscribe({
+      next: () => {
+        this.savingCredit.set(false);
+        this.creditForm.reset({ role: '', person_name: '', display_order: 0 });
+        this.loadCredits();
+      },
+      error: () => this.savingCredit.set(false),
+    });
+  }
+
+  deleteCredit(id: string): void {
+    if (!confirm('Delete this credit?')) return;
+    this.admin.delete('project_credits', id).subscribe(() => this.loadCredits());
   }
 
   async onFileChange(event: Event): Promise<void> {

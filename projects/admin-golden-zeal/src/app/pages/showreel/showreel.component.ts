@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
 import type { Showreel } from 'shared';
@@ -18,15 +18,29 @@ import type { Showreel } from 'shared';
           {{ reels().length }} reel{{ reels().length !== 1 ? 's' : '' }}
         </span>
       </div>
-      <p class="text-xs mb-8" style="color:#555550;">
+      <p class="text-xs mb-6" style="color:#555550;">
         Active reels cycle every 5 s on the home page hero. YouTube ID takes priority over Vimeo if both are set.
       </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 mb-6">
+        <input
+          type="text" placeholder="Search by title, client or director..."
+          [value]="search()" (input)="search.set($any($event.target).value)"
+          class="w-full sm:max-w-sm bg-transparent py-2 px-3 text-sm focus:outline-none"
+          style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);"
+        />
+        @if (!formOpen()) {
+          <button type="button" (click)="openAdd()" class="shrink-0 px-4 py-2 text-xs uppercase tracking-widest" style="background:#C9A04A;color:#0a150f;">
+            + Add Showreel
+          </button>
+        }
+      </div>
 
       <!-- Banners -->
       @if (loadError()) {
         <div class="p-3 mb-6 text-xs" style="background:rgba(220,50,50,0.1);border:1px solid #dc3232;color:#ff6b6b;">
           ⚠ Could not load reels — the DB migration may not have been applied yet.<br/>
-          <span style="color:#888880;">{{ loadError() }}</span>
+          <span style="color:#8a9e90;">{{ loadError() }}</span>
         </div>
       }
       @if (saved()) {
@@ -36,11 +50,89 @@ import type { Showreel } from 'shared';
         <div class="p-3 mb-4 text-xs" style="background:rgba(220,50,50,0.1);border:1px solid #dc3232;color:#ff6b6b;">{{ errorMsg() }}</div>
       }
 
+      <!-- ── Add / Edit form ── -->
+      @if (formOpen()) {
+        <div class="p-6 mb-10" style="background:#111;border:1px solid rgba(240,235,224,0.08);">
+          <div class="flex items-center justify-between mb-5">
+            <p class="text-xs tracking-widest uppercase" style="color:#C9A04A;">
+              {{ editingId() ? 'Editing Showreel' : 'Add New Showreel' }}
+            </p>
+            <button type="button" (click)="cancelEdit()"
+                    class="text-[11px] px-3 py-1 uppercase tracking-widest"
+                    style="border:1px solid rgba(240,235,224,0.1);color:#666660;">
+              Cancel
+            </button>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">YouTube ID</label>
+                <input type="text" formControlName="youtube_id" placeholder="e.g. dQw4w9WgXcQ"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+              <div>
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Vimeo ID</label>
+                <input type="text" formControlName="vimeo_id" placeholder="e.g. 123456789"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Title</label>
+              <input type="text" formControlName="title" placeholder="e.g. Commercial Reel 2024"
+                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Client / Brand</label>
+                <input type="text" formControlName="client"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+              <div>
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Director</label>
+                <input type="text" formControlName="director"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Thumbnail URL (optional — YouTube auto-generates one)</label>
+                <input type="text" formControlName="thumbnail_url"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+              <div>
+                <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Sort Order</label>
+                <input type="number" formControlName="sort_order"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" [disabled]="saving()"
+                      class="px-8 py-2 text-xs uppercase tracking-widest"
+                      style="background:#C9A04A;color:#0a150f;">
+                {{ saving() ? 'Saving…' : (editingId() ? 'Update Showreel' : 'Add Showreel') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+
       <!-- ── Reels table ── -->
       <div class="mb-10" style="border:1px solid rgba(240,235,224,0.08);">
 
-        <!-- Table header -->
-        <div class="grid gap-3 px-4 py-2 text-[10px] uppercase tracking-widest"
+        <!-- Table header (hidden on mobile — rows stack as cards instead) -->
+        <div class="hidden sm:grid gap-3 px-4 py-2 text-[10px] uppercase tracking-widest"
              style="grid-template-columns:2fr 1fr 1fr 1fr auto;background:#0d0d0d;color:#555550;border-bottom:1px solid rgba(240,235,224,0.06);">
           <span>Title</span>
           <span>Client</span>
@@ -60,13 +152,17 @@ import type { Showreel } from 'shared';
         } @else if (reels().length === 0) {
           <div class="px-4 py-12 text-center">
             <p class="text-sm mb-1" style="color:#555550;">No showreels yet</p>
-            <p class="text-xs" style="color:#3a3a3a;">Use the form below to add your first one.</p>
+            <p class="text-xs" style="color:#3a3a3a;">Use the "+ Add Showreel" button above to add your first one.</p>
+          </div>
+        } @else if (filtered().length === 0) {
+          <div class="px-4 py-12 text-center">
+            <p class="text-sm" style="color:#555550;">No matches.</p>
           </div>
         } @else {
-          @for (reel of reels(); track reel.id) {
-            <div class="grid gap-3 px-4 py-4 items-center transition-colors"
+          @for (reel of filtered(); track reel.id) {
+            <div class="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:gap-3 gap-2 px-4 py-4 sm:items-center transition-colors"
                  [style.background]="editingId() === reel.id ? 'rgba(201,160,74,0.05)' : 'transparent'"
-                 style="grid-template-columns:2fr 1fr 1fr 1fr auto;border-bottom:1px solid rgba(240,235,224,0.05);">
+                 style="border-bottom:1px solid rgba(240,235,224,0.05);">
 
               <!-- Title + thumbnail preview -->
               <div class="flex items-center gap-3 min-w-0">
@@ -86,7 +182,7 @@ import type { Showreel } from 'shared';
               </div>
 
               <!-- Client -->
-              <p class="text-xs truncate" style="color:#888880;">{{ reel.client ?? '—' }}</p>
+              <p class="text-xs truncate" style="color:#8a9e90;">{{ reel.client ?? '—' }}</p>
 
               <!-- Source ID -->
               @if (reel.youtube_id) {
@@ -105,7 +201,7 @@ import type { Showreel } from 'shared';
               </span>
 
               <!-- Actions -->
-              <div class="flex gap-2 shrink-0">
+              <div class="flex gap-2 shrink-0 flex-wrap">
                 <button (click)="startEdit(reel)" title="Edit"
                         class="text-[11px] px-2 py-1 uppercase tracking-widest transition-colors"
                         [style.background]="editingId() === reel.id ? 'rgba(201,160,74,0.2)' : 'transparent'"
@@ -127,84 +223,6 @@ import type { Showreel } from 'shared';
           }
         }
       </div>
-
-      <!-- ── Add / Edit form ── -->
-      <div class="p-6" style="background:#111;border:1px solid rgba(240,235,224,0.08);">
-        <div class="flex items-center justify-between mb-5">
-          <p class="text-xs tracking-widest uppercase" style="color:#C9A04A;">
-            {{ editingId() ? 'Editing Showreel' : 'Add New Showreel' }}
-          </p>
-          @if (editingId()) {
-            <button type="button" (click)="cancelEdit()"
-                    class="text-[11px] px-3 py-1 uppercase tracking-widest"
-                    style="border:1px solid rgba(240,235,224,0.1);color:#666660;">
-              Cancel
-            </button>
-          }
-        </div>
-
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">YouTube ID</label>
-              <input type="text" formControlName="youtube_id" placeholder="e.g. dQw4w9WgXcQ"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-            <div>
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Vimeo ID</label>
-              <input type="text" formControlName="vimeo_id" placeholder="e.g. 123456789"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Title</label>
-            <input type="text" formControlName="title" placeholder="e.g. Commercial Reel 2024"
-                   class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                   style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Client / Brand</label>
-              <input type="text" formControlName="client"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-            <div>
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Director</label>
-              <input type="text" formControlName="director"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-4">
-            <div class="col-span-2">
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Thumbnail URL (optional — YouTube auto-generates one)</label>
-              <input type="text" formControlName="thumbnail_url"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-            <div>
-              <label class="block text-[10px] tracking-widest uppercase mb-1" style="color:#666660;">Sort Order</label>
-              <input type="number" formControlName="sort_order"
-                     class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                     style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
-            </div>
-          </div>
-
-          <div class="pt-2">
-            <button type="submit" [disabled]="saving()"
-                    class="px-8 py-2 text-xs uppercase tracking-widest"
-                    style="background:#C9A04A;color:#0f0f0f;">
-              {{ saving() ? 'Saving…' : (editingId() ? 'Update Showreel' : 'Add Showreel') }}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   `,
 })
@@ -219,6 +237,16 @@ export class ShowreelAdminComponent implements OnInit {
   errorMsg  = signal('');
   loadError = signal('');
   editingId = signal<string | null>(null);
+  formOpen = signal(false);
+  search = signal('');
+
+  filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    if (!q) return this.reels();
+    return this.reels().filter((r) =>
+      [r.title, (r as any).client, (r as any).director].some((v: string | null | undefined) => v?.toLowerCase().includes(q))
+    );
+  });
 
   form = this.fb.nonNullable.group({
     vimeo_id:      [''],
@@ -258,6 +286,12 @@ export class ShowreelAdminComponent implements OnInit {
     });
   }
 
+  openAdd(): void {
+    this.cancelEdit();
+    this.formOpen.set(true);
+    this.scrollTop();
+  }
+
   startEdit(reel: Showreel): void {
     this.editingId.set(reel.id);
     this.form.patchValue({
@@ -270,12 +304,18 @@ export class ShowreelAdminComponent implements OnInit {
       sort_order:    (reel as any).sort_order    ?? 0,
       is_active:     (reel as any).is_active     ?? true,
     });
-    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 50);
+    this.formOpen.set(true);
+    this.scrollTop();
   }
 
   cancelEdit(): void {
     this.editingId.set(null);
+    this.formOpen.set(false);
     this.form.reset({ sort_order: 0, is_active: true });
+  }
+
+  private scrollTop(): void {
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   }
 
   toggleActive(reel: Showreel): void {
@@ -315,8 +355,7 @@ export class ShowreelAdminComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.saved.set(true);
-        this.editingId.set(null);
-        this.form.reset({ sort_order: 0, is_active: true });
+        this.cancelEdit();
         this.loadReels();
         setTimeout(() => this.saved.set(false), 2500);
       },
