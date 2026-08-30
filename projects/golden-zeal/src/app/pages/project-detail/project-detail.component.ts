@@ -5,6 +5,7 @@ import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
+import { PostHogService } from '../../core/services/posthog.service';
 import type { Project } from 'shared';
 
 @Component({
@@ -109,7 +110,16 @@ import type { Project } from 'shared';
               @for (group of groupedCredits(); track group.role) {
                 <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">{{ group.role }}</p>
-                  <p class="text-base" style="color: var(--gz-text);">{{ group.names.join(', ') }}</p>
+                  <p class="text-base" style="color: var(--gz-text);">
+                    @for (entry of group.entries; track entry.name; let last = $last) {
+                      @if (entry.slug) {
+                        <a [routerLink]="['/crew', entry.slug]" class="transition-colors hover:opacity-80" style="color: var(--gz-text);">{{ entry.name }}</a>
+                      } @else {
+                        {{ entry.name }}
+                      }
+                      @if (!last) {<span>, </span>}
+                    }
+                  </p>
                 </div>
               }
               @if (project()!.client) {
@@ -189,6 +199,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly posthogService = inject(PostHogService);
 
   @ViewChild('videoSection') videoSection?: ElementRef<HTMLElement>;
 
@@ -216,13 +227,14 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
     return (this.project()?.stills ?? []).slice(0, 4);
   }
 
-  groupedCredits(): { role: string; names: string[] }[] {
+  groupedCredits(): { role: string; entries: { name: string; slug: string | null }[] }[] {
     const credits = this.project()?.credits ?? [];
-    const groups: { role: string; names: string[] }[] = [];
+    const groups: { role: string; entries: { name: string; slug: string | null }[] }[] = [];
     for (const c of credits) {
+      const entry = { name: c.person_name, slug: c.team_member?.slug ?? null };
       const existing = groups.find((g) => g.role === c.role);
-      if (existing) existing.names.push(c.person_name);
-      else groups.push({ role: c.role, names: [c.person_name] });
+      if (existing) existing.entries.push(entry);
+      else groups.push({ role: c.role, entries: [entry] });
     }
     return groups;
   }
@@ -299,6 +311,12 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.project.set(p);
         this.loading.set(false);
         if (p) {
+          this.posthogService.posthog.capture('project_viewed', {
+            project_slug: p.slug,
+            project_title: p.title,
+            project_category: p.category,
+            has_video: !!(p.vimeo_id || p.youtube_id),
+          });
           this.content.getProjects(p.category).subscribe((all) => {
             this.related.set(all.filter((r) => r.id !== p.id).slice(0, 3));
           });

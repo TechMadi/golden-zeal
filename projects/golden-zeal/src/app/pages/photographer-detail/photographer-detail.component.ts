@@ -4,6 +4,7 @@ import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
+import { PostHogService } from '../../core/services/posthog.service';
 import type { Photographer, Project } from 'shared';
 
 @Component({
@@ -91,6 +92,7 @@ import type { Photographer, Project } from 'shared';
 export class PhotographerDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
+  private readonly posthogService = inject(PostHogService);
 
   photographer = signal<Photographer | null>(null);
   projects = signal<Project[]>([]);
@@ -104,6 +106,10 @@ export class PhotographerDetailComponent implements OnInit {
         this.photographer.set(p);
         this.loading.set(false);
         if (p) {
+          this.posthogService.posthog.capture('photographer_viewed', {
+            photographer_slug: p.slug,
+            photographer_name: p.name,
+          });
           this.content.getProjectsByPhotographer(p.id).subscribe((projects) => this.projects.set(projects));
         }
       });

@@ -48,6 +48,12 @@ export interface ProjectCredit {
   person_name: string;
   role: string;
   display_order: number;
+  // Optional — only set when the credited person is still a current team member.
+  // Free-text person_name is always the display source of truth; the link just
+  // enables portfolio aggregation on that person's profile page.
+  team_member_id: string | null;
+  // joined
+  team_member?: Pick<TeamMember, 'id' | 'name' | 'slug'>;
 }
 
 export interface ProjectStill {
@@ -60,12 +66,16 @@ export interface ProjectStill {
 export interface TeamMember {
   id: string;
   name: string;
+  slug: string;
+  bio: string | null;
   role: string;
   location: string | null;
   email: string | null;
   photo_url: string | null;
   is_core: boolean;
   display_order: number;
+  // joined
+  credits?: Project[];
 }
 
 export interface RegionalRep {

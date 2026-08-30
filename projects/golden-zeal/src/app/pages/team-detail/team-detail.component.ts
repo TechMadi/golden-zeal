@@ -4,11 +4,10 @@ import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
-import { PostHogService } from '../../core/services/posthog.service';
-import type { Director, Project } from 'shared';
+import type { TeamMember, Project } from 'shared';
 
 @Component({
-  selector: 'app-director-detail',
+  selector: 'app-team-detail',
   standalone: true,
   imports: [RouterLink, AppHeaderComponent, AppFooterComponent, RevealDirective],
   template: `
@@ -19,35 +18,35 @@ import type { Director, Project } from 'shared';
         <div class="flex items-center justify-center h-screen">
           <div class="w-8 h-8 border-2 rounded-full animate-spin" style="border-color: var(--gz-gold); border-top-color: transparent;"></div>
         </div>
-      } @else if (!director()) {
+      } @else if (!member()) {
         <div class="flex flex-col items-center justify-center h-screen gap-4">
-          <p style="color: var(--gz-muted);">Director not found.</p>
-          <a routerLink="/directors" class="btn-outline">Back to Directors</a>
+          <p style="color: var(--gz-muted);">Team member not found.</p>
+          <a routerLink="/crew" class="btn-outline">Back to Crew</a>
         </div>
       } @else {
         <!-- Hero -->
         <div class="relative h-[70vh] overflow-hidden" style="background: var(--gz-surface);">
-          @if (director()!.hero_image_url) {
+          @if (member()!.photo_url) {
             <img
-              [src]="director()!.hero_image_url!"
-              [alt]="director()!.name"
+              [src]="member()!.photo_url!"
+              [alt]="member()!.name"
               class="w-full h-full object-cover object-top"
             />
           }
           <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(15,15,15,1) 0%, rgba(15,15,15,0.3) 60%, transparent 100%);"></div>
           <div class="absolute bottom-0 left-0 px-6 md:px-10 pb-10">
-            <p class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">Director</p>
-            <h1 class="text-6xl md:text-8xl" style="color: var(--gz-text);">{{ director()!.name }}</h1>
-            @if (director()!.location) {
-              <p class="text-sm mt-2 tracking-widest uppercase" style="color: var(--gz-muted);">{{ director()!.location }}</p>
+            <p class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">{{ member()!.role }}</p>
+            <h1 class="text-6xl md:text-8xl" style="color: var(--gz-text);">{{ member()!.name }}</h1>
+            @if (member()!.location) {
+              <p class="text-sm mt-2 tracking-widest uppercase" style="color: var(--gz-muted);">{{ member()!.location }}</p>
             }
           </div>
         </div>
 
         <!-- Bio -->
-        @if (director()!.bio) {
+        @if (member()!.bio) {
           <div class="px-6 md:px-10 py-16 max-w-3xl">
-            <p appReveal class="text-base md:text-lg leading-relaxed" style="color: var(--gz-muted);">{{ director()!.bio }}</p>
+            <p appReveal class="text-base md:text-lg leading-relaxed" style="color: var(--gz-muted);">{{ member()!.bio }}</p>
           </div>
         }
 
@@ -79,7 +78,7 @@ import type { Director, Project } from 'shared';
 
         <!-- Back -->
         <div class="px-6 md:px-10 pb-16">
-          <a routerLink="/directors" class="btn-outline">← All Directors</a>
+          <a routerLink="/crew" class="btn-outline">← All Crew</a>
         </div>
       }
     </main>
@@ -87,12 +86,11 @@ import type { Director, Project } from 'shared';
     <app-footer />
   `,
 })
-export class DirectorDetailComponent implements OnInit {
+export class TeamDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
-  private readonly posthogService = inject(PostHogService);
 
-  director = signal<Director | null>(null);
+  member = signal<TeamMember | null>(null);
   projects = signal<Project[]>([]);
   loading = signal(true);
 
@@ -100,15 +98,11 @@ export class DirectorDetailComponent implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug') ?? '';
       this.loading.set(true);
-      this.content.getDirectorBySlug(slug).subscribe((d) => {
-        this.director.set(d);
+      this.content.getTeamMemberBySlug(slug).subscribe((m) => {
+        this.member.set(m);
         this.loading.set(false);
-        if (d) {
-          this.posthogService.posthog.capture('director_viewed', {
-            director_slug: d.slug,
-            director_name: d.name,
-          });
-          this.content.getProjectsByDirector(d.id).subscribe((p) => this.projects.set(p));
+        if (m) {
+          this.content.getProjectsByTeamMember(m.id).subscribe((p) => this.projects.set(p));
         }
       });
     });

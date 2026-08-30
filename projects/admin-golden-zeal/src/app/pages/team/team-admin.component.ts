@@ -37,9 +37,15 @@ import type { TeamMember } from 'shared';
             @for (f of fields; track f.name) {
               <div>
                 <label [for]="f.name" class="block text-xs tracking-widest uppercase mb-1" style="color:#8a9e90;">{{ f.label }}</label>
-                <input [id]="f.name" [type]="f.type" [formControlName]="f.name"
-                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                       style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+                @if (f.type === 'textarea') {
+                  <textarea [id]="f.name" [formControlName]="f.name" rows="4"
+                            class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none resize-none"
+                            style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);"></textarea>
+                } @else {
+                  <input [id]="f.name" [type]="f.type" [formControlName]="f.name"
+                         class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                         style="color:#F0EBE0;border:1px solid rgba(240,235,224,0.1);" />
+                }
               </div>
             }
             <div class="flex items-center gap-3">
@@ -98,15 +104,26 @@ export class TeamAdminComponent implements OnInit {
   });
   private editId = '';
   readonly fields = [
-    { name: 'name',          label: 'Name *',       type: 'text'   },
-    { name: 'role',          label: 'Role *',       type: 'text'   },
-    { name: 'location',      label: 'Location',     type: 'text'   },
-    { name: 'email',         label: 'Email',        type: 'email'  },
-    { name: 'photo_url',     label: 'Photo URL',    type: 'text'   },
-    { name: 'display_order', label: 'Display Order',type: 'number' },
+    { name: 'name',          label: 'Name *',       type: 'text'     },
+    { name: 'slug',          label: 'Slug *',       type: 'text'     },
+    { name: 'role',          label: 'Role *',       type: 'text'     },
+    { name: 'location',      label: 'Location',     type: 'text'     },
+    { name: 'email',         label: 'Email',        type: 'email'    },
+    { name: 'bio',           label: 'Bio',          type: 'textarea' },
+    { name: 'photo_url',     label: 'Photo URL',    type: 'text'     },
+    { name: 'display_order', label: 'Display Order',type: 'number'   },
   ];
-  form = this.fb.nonNullable.group({ name:['',Validators.required], role:['',Validators.required], location:[''], email:[''], photo_url:[''], is_core:[true], display_order:[0] });
-  ngOnInit(): void { this.load(); }
+  form = this.fb.nonNullable.group({ name:['',Validators.required], slug:['',Validators.required], role:['',Validators.required], location:[''], email:[''], bio:[''], photo_url:[''], is_core:[true], display_order:[0] });
+  ngOnInit(): void {
+    this.load();
+    // Auto-generate slug from name (new members only)
+    this.form.get('name')!.valueChanges.subscribe((name) => {
+      if (!this.editing()) {
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        this.form.patchValue({ slug }, { emitEvent: false });
+      }
+    });
+  }
   load(): void { this.admin.list<TeamMember>('team_members').subscribe((t) => this.team.set(t)); }
   openAdd(): void { this.reset(); this.formOpen.set(true); this.scrollTop(); }
   edit(m: TeamMember): void { this.editing.set(true); this.editId = m.id; this.form.patchValue(m as never); this.formOpen.set(true); this.scrollTop(); }

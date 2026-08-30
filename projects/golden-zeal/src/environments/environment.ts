@@ -9,4 +9,6 @@ export const environment = {
     templateId: 'YOUR_EMAILJS_TEMPLATE_ID',
     publicKey: 'YOUR_EMAILJS_PUBLIC_KEY',
   },
+  posthogKey: import.meta.env?.['NG_APP_POSTHOG_PROJECT_TOKEN'] ?? '',
+  posthogHost: import.meta.env?.['NG_APP_POSTHOG_HOST'] ?? '',
 };

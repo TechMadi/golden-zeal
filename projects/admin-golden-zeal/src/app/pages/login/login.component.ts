@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
+import { PostHogService } from '../../services/posthog.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,7 @@ import { AdminSupabaseService } from '../../services/admin-supabase.service';
               id="email" type="email" formControlName="email"
               class="w-full bg-transparent py-3 px-4 text-sm focus:outline-none"
               style="color: #F0EBE0; border: 1px solid rgba(240,235,224,0.1);"
-              placeholder="admin@goldenzealpictures.co.ke"
+              placeholder="Email Address"
             />
           </div>
 
@@ -60,6 +61,7 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly admin = inject(AdminSupabaseService);
   private readonly router = inject(Router);
+  private readonly posthogService = inject(PostHogService);
 
   loading = signal(false);
   error = signal('');
@@ -75,17 +77,28 @@ export class LoginComponent {
     this.error.set('');
     this.admin.signIn(this.form.getRawValue().email, this.form.getRawValue().password)
       .subscribe({
-        next: ({ error }) => {
-          if (error) {
-            this.error.set(error.message);
+        next: (result) => {
+          if (result['error']) {
+            this.error.set(result['error'].message);
             this.loading.set(false);
+            this.posthogService.posthog.capture('admin_login_failed', {
+              error_message: result['error'].message,
+            });
           } else {
+            const user = result['data']?.['user'];
+            if (user?.id) {
+              this.posthogService.posthog.identify(user.id);
+            }
+            this.posthogService.posthog.capture('admin_login');
             this.router.navigate(['/dashboard']);
           }
         },
-        error: () => {
+        error: (err: unknown) => {
           this.error.set('Failed to sign in. Please try again.');
           this.loading.set(false);
+          this.posthogService.posthog.capture('admin_login_failed', {
+            error_message: err instanceof Error ? err.message : 'unknown',
+          });
         },
       });
   }

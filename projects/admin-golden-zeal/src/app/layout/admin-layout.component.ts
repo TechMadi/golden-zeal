@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AdminSupabaseService } from '../services/admin-supabase.service';
+import { PostHogService } from '../services/posthog.service';
 
 interface NavItem { label: string; path: string; }
 
@@ -69,10 +70,21 @@ interface NavItem { label: string; path: string; }
     </div>
   `,
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   private readonly admin = inject(AdminSupabaseService);
   private readonly router = inject(Router);
+  private readonly posthogService = inject(PostHogService);
   mobileOpen = signal(false);
+
+  ngOnInit(): void {
+    // Identify returning admin users so page-refresh sessions are not anonymous
+    this.admin.getSession().subscribe((result) => {
+      const user = result['data']?.['session']?.['user'];
+      if (user?.id) {
+        this.posthogService.posthog.identify(user.id);
+      }
+    });
+  }
 
   readonly navItems: NavItem[] = [
     { label: 'Dashboard',     path: '/dashboard'    },
@@ -88,6 +100,8 @@ export class AdminLayoutComponent {
   ];
 
   signOut(): void {
+    this.posthogService.posthog.capture('admin_signed_out');
+    this.posthogService.posthog.reset();
     this.admin.signOut().subscribe(() => this.router.navigate(['/login']));
   }
 }

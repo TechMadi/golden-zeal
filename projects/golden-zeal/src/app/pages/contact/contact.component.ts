@@ -4,6 +4,7 @@ import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
+import { PostHogService } from '../../core/services/posthog.service';
 import type { TeamMember, RegionalRep } from 'shared';
 
 // Keep EmailJS for sending
@@ -147,6 +148,7 @@ import { environment } from '../../../environments/environment';
 export class ContactComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly content = inject(ContentService);
+  private readonly posthogService = inject(PostHogService);
 
   reps = signal<RegionalRep[]>([]);
   sending = signal(false);
@@ -154,10 +156,11 @@ export class ContactComponent implements OnInit {
   messageType = signal<'success' | 'error'>('success');
 
   readonly formFields = [
-    { name: 'name',    label: 'Name',    type: 'text',     required: true,  error: 'Name is required' },
-    { name: 'email',   label: 'Email',   type: 'email',    required: true,  error: 'Valid email required' },
-    { name: 'phone',   label: 'Phone',   type: 'tel',      required: false, error: '' },
-    { name: 'message', label: 'Message', type: 'textarea', required: true,  error: 'Message is required' },
+    { name: 'name',    label: 'Name',            type: 'text',     required: true,  error: 'Name is required' },
+    { name: 'email',   label: 'Email',           type: 'email',    required: true,  error: 'Valid email required' },
+    { name: 'phone',   label: 'Phone',           type: 'tel',      required: false, error: '' },
+    { name: 'phone2',  label: 'Alternate Phone', type: 'tel',      required: false, error: '' },
+    { name: 'message', label: 'Message',         type: 'textarea', required: true,  error: 'Message is required' },
   ];
 
   readonly socials = [
@@ -171,6 +174,7 @@ export class ContactComponent implements OnInit {
     name:    ['', Validators.required],
     email:   ['', [Validators.required, Validators.email]],
     phone:   [''],
+    phone2:  [''],
     message: ['', Validators.required],
   });
 
@@ -191,16 +195,23 @@ export class ContactComponent implements OnInit {
           from_name:  this.form.getRawValue().name,
           from_email: this.form.getRawValue().email,
           phone:      this.form.getRawValue().phone || '',
+          phone2:     this.form.getRawValue().phone2 || '',
           message:    this.form.getRawValue().message,
         },
         publicKey
       );
       this.messageType.set('success');
       this.message.set('Thank you — your message has been sent. We will be in touch within 48 hours.');
+      this.posthogService.posthog.capture('contact_form_submitted', {
+        has_phone: !!this.form.getRawValue().phone,
+        message_length: this.form.getRawValue().message.length,
+      });
       this.form.reset();
-    } catch {
+    } catch (err) {
       this.messageType.set('error');
       this.message.set('Something went wrong. Please email us directly at rodgers@goldenzealpictures.co.ke');
+      this.posthogService.posthog.capture('contact_form_failed');
+      this.posthogService.posthog.captureException(err instanceof Error ? err : new Error(String(err)));
     } finally {
       this.sending.set(false);
     }

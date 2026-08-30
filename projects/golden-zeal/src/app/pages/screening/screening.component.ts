@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
+import { PostHogService } from '../../core/services/posthog.service';
 
 @Component({
   selector: 'app-screening',
   standalone: true,
-  imports: [RouterLink, AppHeaderComponent, AppFooterComponent, RevealDirective],
+  imports: [AppHeaderComponent, AppFooterComponent, RevealDirective],
   template: `
     <app-header />
 
@@ -48,7 +49,7 @@ import { RevealDirective } from '../../core/directives/reveal.directive';
       <div class="px-6 md:px-10 py-20 text-center" style="border-top: 1px solid var(--gz-border);">
         <p appReveal class="text-xs tracking-[0.3em] uppercase mb-4" style="color: var(--gz-gold);">Stay In The Loop</p>
         <h2 appReveal class="text-4xl md:text-6xl mb-8 reveal-delay-1" style="color: var(--gz-text);">WANT TO BE FIRST TO KNOW?</h2>
-        <a routerLink="/contact" appReveal class="btn-gold reveal-delay-2">Get In Touch</a>
+        <button type="button" (click)="onCtaClick()" appReveal class="btn-gold reveal-delay-2">Get In Touch</button>
       </div>
     </main>
 
@@ -56,6 +57,14 @@ import { RevealDirective } from '../../core/directives/reveal.directive';
   `,
 })
 export class ScreeningComponent {
+  private readonly posthogService = inject(PostHogService);
+  private readonly router = inject(Router);
+
+  onCtaClick(): void {
+    this.posthogService.posthog.capture('screening_cta_clicked');
+    this.router.navigate(['/contact']);
+  }
+
   readonly highlights = [
     { title: 'Premieres',   copy: 'First looks at our latest cinematic and commercial work, on the big screen.' },
     { title: 'Q&A Sessions', copy: 'Conversations with directors, DOPs and cast behind the stories.' },

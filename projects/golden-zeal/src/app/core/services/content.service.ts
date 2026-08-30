@@ -62,7 +62,7 @@ export class ContentService {
       this.sb
         .from('projects')
         .select(
-          '*, director:directors(id,name,slug), photographer:photographers(id,name,slug), stills:project_stills(*), credits:project_credits(*)'
+          '*, director:directors(id,name,slug), photographer:photographers(id,name,slug), stills:project_stills(*), credits:project_credits(*, team_member:team_members(id,name,slug))'
         )
         .eq('slug', slug)
         .maybeSingle()
@@ -102,6 +102,37 @@ export class ContentService {
     return from(
       this.sb.from('team_members').select('*').order('display_order', { ascending: true })
     ).pipe(map((r) => (r.data as TeamMember[]) ?? []));
+  }
+
+  getTeamMemberBySlug(slug: string): Observable<TeamMember | null> {
+    return from(
+      this.sb.from('team_members').select('*').eq('slug', slug).maybeSingle()
+    ).pipe(map((r) => (r.data as TeamMember) ?? null));
+  }
+
+  // Portfolio for a team member's profile page — every project they have a *linked*
+  // credit on (unlinked/free-text credits can't be attributed to a specific person).
+  getProjectsByTeamMember(teamMemberId: string): Observable<Project[]> {
+    return from(
+      this.sb
+        .from('project_credits')
+        .select('project:projects(*, director:directors(id,name,slug), photographer:photographers(id,name,slug))')
+        .eq('team_member_id', teamMemberId)
+    ).pipe(
+      map((r) => {
+        const rows = (r.data as any[]) ?? [];
+        const seen = new Set<string>();
+        const projects: Project[] = [];
+        for (const row of rows) {
+          const p = row.project as Project | null;
+          if (p && !seen.has(p.id)) {
+            seen.add(p.id);
+            projects.push(p);
+          }
+        }
+        return projects.sort((a, b) => a.display_order - b.display_order);
+      })
+    );
   }
 
   // ── Regional Reps ──────────────────────────────────────────
