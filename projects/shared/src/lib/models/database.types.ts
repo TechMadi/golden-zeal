@@ -104,6 +104,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_credits: {
+        Row: {
+          created_at: string | null
+          display_order: number
+          id: string
+          person_name: string
+          project_id: string
+          role: string
+          team_member_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          person_name: string
+          project_id: string
+          role: string
+          team_member_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          person_name?: string
+          project_id?: string
+          role?: string
+          team_member_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_credits_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_credits_team_member_id_fkey"
+            columns: ["team_member_id"]
+            isOneToOne: false
+            referencedRelation: "team_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_stills: {
         Row: {
           display_order: number
@@ -426,6 +471,7 @@ export type Database = {
       }
       team_members: {
         Row: {
+          bio: string | null
           created_at: string | null
           display_order: number
           email: string | null
@@ -435,8 +481,10 @@ export type Database = {
           name: string
           photo_url: string | null
           role: string
+          slug: string
         }
         Insert: {
+          bio?: string | null
           created_at?: string | null
           display_order?: number
           email?: string | null
@@ -446,8 +494,10 @@ export type Database = {
           name: string
           photo_url?: string | null
           role: string
+          slug: string
         }
         Update: {
+          bio?: string | null
           created_at?: string | null
           display_order?: number
           email?: string | null
@@ -457,6 +507,7 @@ export type Database = {
           name?: string
           photo_url?: string | null
           role?: string
+          slug?: string
         }
         Relationships: []
       }

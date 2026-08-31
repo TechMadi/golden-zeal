@@ -49,6 +49,11 @@ export const routes: Routes = [
       import('./pages/crew/crew.component').then((m) => m.CrewComponent),
   },
   {
+    path: 'crew/:slug',
+    loadComponent: () =>
+      import('./pages/team-detail/team-detail.component').then((m) => m.TeamDetailComponent),
+  },
+  {
     path: 'screening',
     loadComponent: () =>
       import('./pages/screening/screening.component').then((m) => m.ScreeningComponent),

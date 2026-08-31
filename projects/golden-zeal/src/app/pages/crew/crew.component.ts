@@ -54,7 +54,7 @@ import type { TeamMember } from 'shared';
         } @else {
           <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             @for (member of core(); track member.id) {
-              <div appReveal class="group">
+              <a [routerLink]="['/crew', member.slug]" appReveal class="group block">
                 <!-- Photo -->
                 <div class="aspect-[3/4] overflow-hidden mb-4 relative" style="background: var(--gz-surface);">
                   @if (member.photo_url) {
@@ -83,7 +83,7 @@ import type { TeamMember } from 'shared';
                 @if (member.location) {
                   <p class="text-xs mt-1" style="color: var(--gz-border);">{{ member.location }}</p>
                 }
-              </div>
+              </a>
             }
           </div>
         }
@@ -95,13 +95,13 @@ import type { TeamMember } from 'shared';
           <h2 appReveal class="text-4xl md:text-5xl mb-10" style="color: var(--gz-text);">EXTENDED CREW</h2>
           <div class="divide-y" style="border-color: var(--gz-border);">
             @for (member of extended(); track member.id) {
-              <div appReveal class="grid grid-cols-2 md:grid-cols-3 gap-4 py-4">
+              <a [routerLink]="['/crew', member.slug]" appReveal class="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 transition-opacity hover:opacity-70">
                 <p class="text-sm" style="color: var(--gz-text);">{{ member.name }}</p>
                 <p class="text-sm" style="color: var(--gz-muted);">{{ member.role }}</p>
                 @if (member.location) {
                   <p class="text-sm hidden md:block" style="color: var(--gz-border);">{{ member.location }}</p>
                 }
-              </div>
+              </a>
             }
           </div>
         </div>

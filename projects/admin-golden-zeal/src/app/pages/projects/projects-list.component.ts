@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
+import { PostHogService } from '../../services/posthog.service';
 import type { Project } from 'shared';
 
 @Component({
@@ -62,6 +63,7 @@ import type { Project } from 'shared';
 })
 export class ProjectsListComponent implements OnInit {
   private readonly admin = inject(AdminSupabaseService);
+  private readonly posthogService = inject(PostHogService);
   projects = signal<Project[]>([]);
   loading = signal(true);
   search = signal('');
@@ -88,6 +90,13 @@ export class ProjectsListComponent implements OnInit {
 
   delete(id: string): void {
     if (!confirm('Delete this project?')) return;
-    this.admin.delete('projects', id).subscribe(() => this.load());
+    const project = this.projects().find((p) => p.id === id);
+    this.admin.delete('projects', id).subscribe(() => {
+      this.posthogService.posthog.capture('project_deleted', {
+        project_title: project?.title,
+        project_category: project?.category,
+      });
+      this.load();
+    });
   }
 }

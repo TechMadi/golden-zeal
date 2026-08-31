@@ -62,7 +62,10 @@ export class AdminSupabaseService {
   // ── Project credits ────────────────────────────────────────
   listCredits(projectId: string): Observable<ProjectCredit[]> {
     return this.q<AnyRecord>(
-      this.sb.from('project_credits').select('*').eq('project_id', projectId).order('display_order', { ascending: true })
+      this.sb.from('project_credits')
+        .select('*, team_member:team_members(id,name,slug)')
+        .eq('project_id', projectId)
+        .order('display_order', { ascending: true })
     ).pipe(map((r: AnyRecord) => (r['data'] as ProjectCredit[]) ?? []));
   }
 

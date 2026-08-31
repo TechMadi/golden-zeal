@@ -1,8 +1,10 @@
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, HostListener } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
-import type { Director, Photographer, ProjectCredit } from 'shared';
+import { PostHogService } from '../../services/posthog.service';
+import type { ProjectCredit, TeamMember } from 'shared';
 
 const CANONICAL_ROLES = [
   'Director',
@@ -162,30 +164,6 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
           </div>
         }
 
-        <!-- Director -->
-        <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Director (optional)</label>
-          <select formControlName="director_id" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
-            <option value="">— None —</option>
-            @for (d of directors(); track d.id) {
-              <option [value]="d.id">{{ d.name }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Photographer -->
-        <div>
-          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Photographer (optional)</label>
-          <select formControlName="photographer_id" class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
-                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
-            <option value="">— None —</option>
-            @for (p of photographers(); track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
-            }
-          </select>
-        </div>
-
         <!-- Thumbnail upload -->
         <div>
           <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">Thumbnail Image</label>
@@ -221,7 +199,12 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
               <div class="flex items-center justify-between p-3" style="background:#0f1f16; border:1px solid rgba(240,235,224,0.07);">
                 <div>
                   <p class="text-sm" style="color:#F0EBE0;">{{ c.person_name }}</p>
-                  <p class="text-xs" style="color:#8a9e90;">{{ c.role }}</p>
+                  <p class="text-xs" style="color:#8a9e90;">
+                    {{ c.role }}
+                    @if (c.team_member) {
+                      <span style="color:#C9A04A;"> · Linked to Team</span>
+                    }
+                  </p>
                 </div>
                 <button type="button" (click)="deleteCredit(c.id)" class="text-xs uppercase" style="color:#8a9e90;">Delete</button>
               </div>
@@ -232,16 +215,62 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
           </div>
 
           <form [formGroup]="creditForm" (ngSubmit)="onAddCredit()" class="flex flex-wrap items-end gap-3">
-            <div class="flex-1 min-w-[160px]">
+            <div class="flex-1 min-w-[160px] relative role-combobox">
               <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Role</label>
-              <input type="text" formControlName="role" placeholder="e.g. Cinematographer"
+              <input type="text" placeholder="e.g. Cinematographer"
+                     [value]="roleQuery()"
+                     (input)="onRoleQueryChange($any($event.target).value)"
+                     (focus)="roleDropdownOpen.set(true)"
                      class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                      style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+              @if (roleDropdownOpen() && filteredRoles().length > 0) {
+                <div class="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto z-10" style="background:#0f1f16; border:1px solid rgba(240,235,224,0.1);">
+                  @for (r of filteredRoles(); track r) {
+                    <button type="button" (click)="selectRole(r)"
+                            class="block w-full text-left px-3 py-2 text-sm transition-colors hover:bg-[#152a1d]"
+                            style="color:#F0EBE0;">
+                      {{ r }}
+                    </button>
+                  }
+                </div>
+              }
             </div>
-            <div class="flex-1 min-w-[160px]">
-              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Person Name</label>
-              <input type="text" formControlName="person_name" placeholder="e.g. Paul Kanyiri"
+            <div class="flex-1 min-w-[200px] relative team-member-combobox">
+              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">
+                Link to Team Member <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <input type="text" placeholder="Not a member"
+                       [value]="teamMemberQuery()"
+                       (input)="onTeamMemberQueryChange($any($event.target).value)"
+                       (focus)="teamMemberDropdownOpen.set(true)"
+                       class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                       style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+                @if (creditForm.get('team_member_id')?.value) {
+                  <button type="button" (click)="clearTeamMemberLink()" title="Unlink"
+                          class="shrink-0 text-sm" style="color:#8a9e90;">✕</button>
+                }
+              </div>
+              @if (teamMemberDropdownOpen() && filteredTeamMembers().length > 0) {
+                <div class="absolute top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto z-10" style="background:#0f1f16; border:1px solid rgba(240,235,224,0.1);">
+                  @for (m of filteredTeamMembers(); track m.id) {
+                    <button type="button" (click)="selectTeamMember(m)"
+                            class="block w-full text-left px-3 py-2 text-sm transition-colors hover:bg-[#152a1d]"
+                            style="color:#F0EBE0;">
+                      {{ m.name }}
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+            <div class="flex-1 min-w-[220px]">
+              <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">
+                Person Name(s) <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(comma-separate for multiple — unlinked only)</span>
+              </label>
+              <input type="text" formControlName="person_name" placeholder="e.g. Paul Kanyiri, Julian Oburu"
+                     [readOnly]="!!creditForm.get('team_member_id')?.value"
                      class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                     [style.opacity]="creditForm.get('team_member_id')?.value ? '0.7' : '1'"
                      style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
             </div>
             <div class="w-24">
@@ -250,9 +279,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
                      class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                      style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
             </div>
-            <button type="submit" [disabled]="creditForm.invalid || savingCredit()"
+            <button type="submit" [disabled]="!canAddCredit() || savingCredit()"
                     class="px-4 py-2 text-xs tracking-widest uppercase transition-colors"
-                    style="background:#C9A04A; color:#0a150f;" [style.opacity]="creditForm.invalid || savingCredit() ? '0.6' : '1'">
+                    style="background:#C9A04A; color:#0a150f;" [style.opacity]="!canAddCredit() || savingCredit() ? '0.6' : '1'">
               Add
             </button>
           </form>
@@ -266,14 +295,16 @@ export class ProjectFormComponent implements OnInit {
   private readonly admin = inject(AdminSupabaseService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly posthogService = inject(PostHogService);
 
   isEdit = signal(false);
   saving = signal(false);
   saved = signal(false);
   errorMsg = signal('');
   uploadingImage = signal(false);
-  directors = signal<Director[]>([]);
-  photographers = signal<Photographer[]>([]);
+  teamMembers = signal<TeamMember[]>([]);
+  teamMemberQuery = signal('');
+  teamMemberDropdownOpen = signal(false);
   selectedCategory = signal('commercial');
   credits = signal<ProjectCredit[]>([]);
   savingCredit = signal(false);
@@ -289,23 +320,86 @@ export class ProjectFormComponent implements OnInit {
     year:            [new Date().getFullYear()],
     category:        ['commercial', Validators.required],
     sub_category:    [''],
-    director_id:     [''],
-    photographer_id: [''],
     vimeo_id:        [''],
     youtube_id:      [''],
     thumbnail_url:   [''],
     display_order:   [0],
   });
 
+  readonly canonicalRoles = CANONICAL_ROLES;
+
   creditForm = this.fb.nonNullable.group({
-    role:          ['', Validators.required],
-    person_name:   ['', Validators.required],
-    display_order: [0],
+    role:            ['', Validators.required],
+    team_member_id:  [''],
+    person_name:     ['', Validators.required],
+    display_order:   [0],
   });
 
+  roleQuery = signal('');
+  roleDropdownOpen = signal(false);
+
+  filteredRoles = computed(() => {
+    const q = this.roleQuery().trim().toLowerCase();
+    if (!q) return this.canonicalRoles;
+    return this.canonicalRoles.filter((r) => r.toLowerCase().includes(q));
+  });
+
+  onRoleQueryChange(value: string): void {
+    this.roleQuery.set(value);
+    this.roleDropdownOpen.set(true);
+    this.creditForm.patchValue({ role: value });
+  }
+
+  selectRole(role: string): void {
+    this.roleQuery.set(role);
+    this.roleDropdownOpen.set(false);
+    this.creditForm.patchValue({ role });
+  }
+
+  filteredTeamMembers = computed(() => {
+    const q = this.teamMemberQuery().trim().toLowerCase();
+    if (!q) return this.teamMembers();
+    return this.teamMembers().filter((m) => m.name.toLowerCase().includes(q));
+  });
+
+  onTeamMemberQueryChange(value: string): void {
+    this.teamMemberQuery.set(value);
+    this.teamMemberDropdownOpen.set(true);
+    // Editing the search text after a selection invalidates that selection —
+    // require picking from the filtered list again to re-link.
+    if (this.creditForm.get('team_member_id')?.value) {
+      this.creditForm.patchValue({ team_member_id: '' });
+    }
+  }
+
+  selectTeamMember(member: TeamMember): void {
+    this.teamMemberQuery.set(member.name);
+    this.teamMemberDropdownOpen.set(false);
+    this.creditForm.patchValue({ team_member_id: member.id, person_name: member.name });
+  }
+
+  clearTeamMemberLink(): void {
+    this.teamMemberQuery.set('');
+    this.creditForm.patchValue({ team_member_id: '', person_name: '' });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.roleDropdownOpen() && !(event.target as HTMLElement).closest('.role-combobox')) {
+      this.roleDropdownOpen.set(false);
+    }
+    if (this.teamMemberDropdownOpen() && !(event.target as HTMLElement).closest('.team-member-combobox')) {
+      this.teamMemberDropdownOpen.set(false);
+    }
+  }
+
+  canAddCredit(): boolean {
+    const { role, person_name } = this.creditForm.getRawValue();
+    return !!role.trim() && !!person_name.trim();
+  }
+
   ngOnInit(): void {
-    this.admin.list<Director>('directors').subscribe((d) => this.directors.set(d));
-    this.admin.list<Photographer>('photographers').subscribe((p) => this.photographers.set(p));
+    this.admin.list<TeamMember>('team_members').subscribe((t) => this.teamMembers.set(t));
 
     // Auto-generate slug from title (new projects only)
     this.form.get('title')!.valueChanges.subscribe((title) => {
@@ -341,13 +435,31 @@ export class ProjectFormComponent implements OnInit {
   }
 
   onAddCredit(): void {
-    if (this.creditForm.invalid || this.savingCredit()) return;
+    if (!this.canAddCredit() || this.savingCredit()) return;
+
+    const { role, team_member_id, person_name, display_order } = this.creditForm.getRawValue();
+    const resolvedRole = role.trim();
+    const names = person_name.split(',').map((n) => n.trim()).filter(Boolean);
+    if (names.length === 0) return;
+
     this.savingCredit.set(true);
-    const data = { ...this.creditForm.getRawValue(), project_id: this.projectId };
-    this.admin.create('project_credits', data).subscribe({
+    const creates = names.map((name, i) =>
+      this.admin.create('project_credits', {
+        project_id: this.projectId,
+        role: resolvedRole,
+        person_name: name,
+        // A linked team member can only ever apply to a single credited name —
+        // if multiple names were entered alongside a link, only the first gets it.
+        team_member_id: team_member_id && i === 0 ? team_member_id : null,
+        display_order: display_order + i,
+      })
+    );
+    forkJoin(creates).subscribe({
       next: () => {
         this.savingCredit.set(false);
-        this.creditForm.reset({ role: '', person_name: '', display_order: 0 });
+        this.creditForm.reset({ role: '', team_member_id: '', person_name: '', display_order: 0 });
+        this.roleQuery.set('');
+        this.teamMemberQuery.set('');
         this.loadCredits();
       },
       error: () => this.savingCredit.set(false),
@@ -390,15 +502,21 @@ export class ProjectFormComponent implements OnInit {
       : this.admin.create('projects', data);
 
     obs.subscribe({
-      next: () => {
+      next: (saved) => {
         this.saving.set(false);
         this.saved.set(true);
+        const eventName = this.isEdit() ? 'project_updated' : 'project_created';
+        this.posthogService.posthog.capture(eventName, {
+          project_category: (saved as Record<string, unknown>)['category'] as string | undefined,
+          project_title: (saved as Record<string, unknown>)['title'] as string | undefined,
+        });
         setTimeout(() => this.router.navigate(['/projects']), 1000);
       },
       error: (err: unknown) => {
         this.saving.set(false);
         const msg = (err instanceof Error ? err.message : (err as { message?: string })?.message) ?? JSON.stringify(err);
         this.errorMsg.set(`Save failed: ${msg}`);
+        this.posthogService.posthog.captureException(err instanceof Error ? err : new Error(msg));
       },
     });
   }
