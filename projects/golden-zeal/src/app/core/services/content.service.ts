@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { pendingUntilEvent } from '@angular/core/rxjs-interop';
 import { from, Observable, map } from 'rxjs';
 import { SupabaseService } from 'shared';
 import type {
@@ -26,6 +27,13 @@ function withDirectors(project: Project): Project {
 @Injectable({ providedIn: 'root' })
 export class ContentService {
   private readonly sb = inject(SupabaseService).client;
+  private readonly injector = inject(Injector);
+
+  // Supabase requests aren't tracked by zoneless change detection, so without this
+  // prerendering finishes before data arrives and ships empty pages to crawlers.
+  private track<T>(request: PromiseLike<T>): Observable<T> {
+    return from(Promise.resolve(request)).pipe(pendingUntilEvent(this.injector));
+  }
 
   // ── Projects ───────────────────────────────────────────────
   getProjects(category?: string): Observable<Project[]> {
@@ -38,11 +46,11 @@ export class ContentService {
       query = query.eq('category', category);
     }
 
-    return from(query).pipe(map((r) => ((r.data as unknown as Project[]) ?? []).map(withDirectors)));
+    return this.track(query).pipe(map((r) => ((r.data as unknown as Project[]) ?? []).map(withDirectors)));
   }
 
   getProjectBySlug(slug: string): Observable<Project | null> {
-    return from(
+    return this.track(
       this.sb
         .from('projects')
         .select(
@@ -62,13 +70,13 @@ export class ContentService {
 
   // ── Team ───────────────────────────────────────────────────
   getTeam(): Observable<TeamMember[]> {
-    return from(
+    return this.track(
       this.sb.from('team_members').select('*').order('display_order', { ascending: true })
     ).pipe(map((r) => (r.data as TeamMember[]) ?? []));
   }
 
   getTeamMemberBySlug(slug: string): Observable<TeamMember | null> {
-    return from(
+    return this.track(
       this.sb.from('team_members').select('*').eq('slug', slug).maybeSingle()
     ).pipe(map((r) => (r.data as TeamMember) ?? null));
   }
@@ -76,7 +84,7 @@ export class ContentService {
   // Portfolio for a team member's profile page — every project they have a *linked*
   // credit on (unlinked/free-text credits can't be attributed to a specific person).
   getProjectsByTeamMember(teamMemberId: string): Observable<Project[]> {
-    return from(
+    return this.track(
       this.sb
         .from('project_credits')
         .select(`project:projects(${PROJECT_LIST_SELECT})`)
@@ -100,21 +108,21 @@ export class ContentService {
 
   // ── Regional Reps ──────────────────────────────────────────
   getReps(): Observable<RegionalRep[]> {
-    return from(
+    return this.track(
       this.sb.from('regional_reps').select('*').order('display_order', { ascending: true })
     ).pipe(map((r) => (r.data as RegionalRep[]) ?? []));
   }
 
   // ── FAQ ────────────────────────────────────────────────────
   getFaq(): Observable<FaqItem[]> {
-    return from(
+    return this.track(
       this.sb.from('faq').select('*').order('display_order', { ascending: true })
     ).pipe(map((r) => (r.data as FaqItem[]) ?? []));
   }
 
   // ── Site Settings ──────────────────────────────────────────
   getSettings(): Observable<Record<string, string>> {
-    return from(
+    return this.track(
       this.sb.from('site_settings').select('*')
     ).pipe(
       map((r) => {
@@ -129,19 +137,19 @@ export class ContentService {
 
   // ── Apprenticeship Cohorts ─────────────────────────────────
   getCohorts(): Observable<ApprenticeshipCohort[]> {
-    return from(
+    return this.track(
       this.sb.from('apprenticeship_cohorts').select('*').order('display_order', { ascending: true })
     ).pipe(map((r) => (r.data as ApprenticeshipCohort[]) ?? []));
   }
 
   getCohortBySlug(slug: string): Observable<ApprenticeshipCohort | null> {
-    return from(
+    return this.track(
       this.sb.from('apprenticeship_cohorts').select('*').eq('slug', slug).maybeSingle()
     ).pipe(map((r) => (r.data as ApprenticeshipCohort) ?? null));
   }
 
   getCohortProjects(cohortId: string): Observable<Project[]> {
-    return from(
+    return this.track(
       this.sb
         .from('cohort_projects')
         .select(`project:projects(${PROJECT_LIST_SELECT})`)
@@ -150,7 +158,7 @@ export class ContentService {
   }
 
   getCohortMembers(cohortId: string): Observable<{ role: string; member: TeamMember }[]> {
-    return from(
+    return this.track(
       this.sb
         .from('cohort_members')
         .select('role, team_member:team_members(*)')
@@ -160,7 +168,7 @@ export class ContentService {
 
   // ── Showreel ───────────────────────────────────────────────
   getShowreels(): Observable<Showreel[]> {
-    return from(
+    return this.track(
       this.sb.from('showreel').select('*').eq('is_active', true).order('sort_order', { ascending: true })
     ).pipe(map((r) => (r.data as Showreel[]) ?? []));
   }

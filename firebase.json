@@ -17,8 +17,26 @@
       },
       {
         "source": "/**",
-        "destination": "/index.html"
+        "destination": "/index.csr.html"
       }
-    ]
+    ],
+    "redirects": [
+      {
+        "source": "/cinematic",
+        "destination": "/narrative",
+        "type": 301
+      },
+      {
+        "source": "/directors{,/**}",
+        "destination": "/crew",
+        "type": 301
+      },
+      {
+        "source": "/photographers{,/**}",
+        "destination": "/crew",
+        "type": 301
+      }
+    ],
+    "trailingSlash": false
   }
 }

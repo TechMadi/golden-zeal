@@ -1,7 +1,9 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject, effect, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject, effect, ElementRef, ViewChild, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
+import { SeoService, SITE_NAME, SITE_URL } from '../../core/services/seo.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
@@ -180,6 +182,8 @@ import type { Project } from 'shared';
 export class ProjectDetailComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
+  private readonly seo = inject(SeoService);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly posthogService = inject(PostHogService);
 
@@ -248,6 +252,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   }
 
   private setupScrollObserver(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     const el = this.videoSection?.nativeElement;
     if (!el) return;
 
@@ -293,6 +298,17 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
         this.project.set(p);
         this.loading.set(false);
         if (p) {
+          const kind = p.category === 'commercial' ? 'Commercial' : 'Film';
+          const description = p.description
+            || `${p.title}${p.client ? ` for ${p.client}` : ''} — ${kind.toLowerCase()} produced by Golden Zeal Pictures${p.year ? ` (${p.year})` : ''}${p.directors?.length ? `, directed by ${p.directors.join(', ')}` : ''}.`;
+          this.seo.update({
+            title: p.client ? `${p.title} — ${p.client}` : p.title,
+            description,
+            path: `/projects/${p.slug}`,
+            image: p.thumbnail_url,
+            type: 'video.other',
+            jsonLd: projectJsonLd(p, description),
+          });
           this.posthogService.posthog.capture('project_viewed', {
             project_slug: p.slug,
             project_title: p.title,
@@ -310,4 +326,53 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.scrollObserver?.disconnect();
   }
+}
+
+// VideoObject when there's a video (eligible for Google video results), otherwise CreativeWork.
+function projectJsonLd(p: Project, description: string): Record<string, unknown>[] {
+  const url = `${SITE_URL}/projects/${p.slug}`;
+  const embedUrl = p.youtube_id
+    ? `https://www.youtube.com/embed/${p.youtube_id}`
+    : p.vimeo_id ? `https://player.vimeo.com/video/${p.vimeo_id}` : null;
+  const people = (...roles: string[]) => (p.credits ?? [])
+    .filter((c) => roles.includes(c.role.trim().toLowerCase()))
+    .map((c) => ({
+      '@type': 'Person',
+      name: c.person_name,
+      ...(c.team_member ? { url: `${SITE_URL}/crew/${c.team_member.slug}` } : {}),
+    }));
+  const directors = people('director');
+  const camera = people('director of photography', 'cinematographer');
+
+  const work: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': embedUrl && p.thumbnail_url ? 'VideoObject' : 'CreativeWork',
+    name: p.title,
+    description,
+    url,
+    ...(p.thumbnail_url ? { thumbnailUrl: p.thumbnail_url, image: p.thumbnail_url } : {}),
+    ...(embedUrl ? { embedUrl } : {}),
+    // Google requires uploadDate for VideoObject. Prefer the release year — created_at
+    // is when the record was added to the CMS, often years after release.
+    ...(p.year || p.created_at ? { uploadDate: p.year ? `${p.year}-01-01T00:00:00+03:00` : p.created_at } : {}),
+    ...(p.year ? { copyrightYear: p.year } : {}),
+    ...(directors.length ? { director: directors } : {}),
+    ...(camera.length ? { contributor: camera } : {}),
+    ...(p.client ? { sponsor: { '@type': 'Organization', name: p.client } } : {}),
+    productionCompany: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+  };
+
+  const section = p.category === 'commercial'
+    ? { name: 'Commercials', path: '/commercial' }
+    : { name: 'Narrative', path: '/narrative' };
+  const breadcrumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: section.name, item: SITE_URL + section.path },
+      { '@type': 'ListItem', position: 3, name: p.title, item: url },
+    ],
+  };
+  return [work, breadcrumbs];
 }
