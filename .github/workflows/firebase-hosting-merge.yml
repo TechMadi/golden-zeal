@@ -17,6 +17,10 @@ jobs:
           node-version: lts/*
       - run: npm i -g pnpm
       - run: pnpm install --ignore-scripts && pnpm build:shared && pnpm build:landing && pnpm build:admin
+        env:
+          NG_APP_POSTHOG_PROJECT_TOKEN: ${{ secrets.NG_APP_POSTHOG_PROJECT_TOKEN }}
+          NG_APP_POSTHOG_HOST: ${{ secrets.NG_APP_POSTHOG_HOST }}
+      - run: pnpm sitemap
       - run: cp -r dist/admin-golden-zeal/browser dist/golden-zeal/browser/crm
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
