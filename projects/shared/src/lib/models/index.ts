@@ -12,6 +12,7 @@ export interface Project {
   youtube_id: string | null;
   featured: boolean;
   display_order: number;
+  created_at?: string | null;
   // joined
   // derived client-side from the project's "Director" crew credits
   directors?: string[];

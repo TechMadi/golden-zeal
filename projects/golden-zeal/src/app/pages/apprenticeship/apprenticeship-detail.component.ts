@@ -2,6 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { UpperCasePipe } from '@angular/common';
 import { ContentService } from '../../core/services/content.service';
+import { SeoService } from '../../core/services/seo.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
@@ -172,6 +173,7 @@ import type { ApprenticeshipCohort, Project, TeamMember } from 'shared';
 export class ApprenticeshipDetailComponent implements OnInit {
   private readonly route   = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
+  private readonly seo     = inject(SeoService);
 
   cohort   = signal<ApprenticeshipCohort | null>(null);
   projects = signal<Project[]>([]);
@@ -194,6 +196,13 @@ export class ApprenticeshipDetailComponent implements OnInit {
       this.content.getCohortBySlug(slug).subscribe((c) => {
         this.cohort.set(c);
         this.loading.set(false);
+        if (c) {
+          this.seo.update({
+            title: `${c.title} — Film Apprenticeship`,
+            description: c.description || `${c.title}: a Golden Zeal Pictures film apprenticeship cohort${c.year ? ` (${c.year})` : ''} in Nairobi, Kenya.`,
+            path: `/apprenticeship/${c.slug}`,
+          });
+        }
 
         if (c) {
           this.content.getCohortProjects(c.id).subscribe((p) => this.projects.set(p));

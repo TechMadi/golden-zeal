@@ -13,8 +13,9 @@
     "serve:ssr:golden-zeal": "node dist/golden-zeal/server/server.mjs",
     "serve:landing": "ng serve golden-zeal",
     "serve:admin": "ng serve admin-golden-zeal --port 4201",
-    "predeploy": "ng build golden-zeal && ng build admin-golden-zeal && cp -r dist/admin-golden-zeal/browser dist/golden-zeal/browser/crm",
-    "deploy": "firebase deploy --only hosting"
+    "predeploy": "ng build golden-zeal && node scripts/generate-sitemap.mjs && ng build admin-golden-zeal && cp -r dist/admin-golden-zeal/browser dist/golden-zeal/browser/crm",
+    "deploy": "firebase deploy --only hosting",
+    "sitemap": "node scripts/generate-sitemap.mjs"
   },
   "private": true,
   "dependencies": {
@@ -42,6 +43,7 @@
     "@angular/build": "^20.2.2",
     "@angular/cli": "^20.0.2",
     "@angular/compiler-cli": "^20.0.0",
+    "@ngx-env/builder": "^20.1.1",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",

@@ -71,11 +71,16 @@ import type { Showreel } from 'shared';
           </p>
           <h1
             appReveal
-            class="leading-none mb-8 reveal-delay-1"
+            class="leading-none mb-6 reveal-delay-1"
             style="font-size: clamp(3.5rem, 10vw, 10rem); color: var(--gz-text);"
           >
             GOLDEN ZEAL<br />PICTURES
           </h1>
+          @if (heroTagline()) {
+            <p appReveal class="text-lg md:text-2xl leading-snug mb-8 reveal-delay-2" style="color: var(--gz-text); max-width: 40rem;">
+              {{ heroTagline() }}
+            </p>
+          }
           <div appReveal class="flex flex-wrap gap-4 reveal-delay-2">
             <a routerLink="/commercial" class="btn-gold">View Our Work</a>
             <a routerLink="/contact" class="btn-outline">Start a Project</a>
@@ -209,6 +214,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     projects throughout East, Central, West and Southern Africa, and Southeast Asia — driven by a
     simple belief: the most powerful stories are those that reveal the human spirit.`
   );
+  heroTagline = signal('We tell the most compelling stories for global audiences.');
   progressKey = signal(0);
   reelOpen    = signal(false);
 
@@ -299,6 +305,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
     this.content.getSettings().subscribe((settings) => {
       if (settings['about_text']) this.aboutText.set(settings['about_text']);
+      if (settings['hero_tagline']) this.heroTagline.set(settings['hero_tagline']);
     });
   }
 

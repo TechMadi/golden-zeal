@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /crm
+
+Sitemap: https://goldenzealpictures.co.ke/sitemap.xml

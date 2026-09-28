@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ContentService } from '../../core/services/content.service';
+import { SeoService, SITE_NAME, SITE_URL } from '../../core/services/seo.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
 import { RevealDirective } from '../../core/directives/reveal.directive';
@@ -89,6 +90,7 @@ import type { TeamMember, Project } from 'shared';
 export class TeamDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly content = inject(ContentService);
+  private readonly seo = inject(SeoService);
 
   member = signal<TeamMember | null>(null);
   projects = signal<Project[]>([]);
@@ -101,6 +103,26 @@ export class TeamDetailComponent implements OnInit {
       this.content.getTeamMemberBySlug(slug).subscribe((m) => {
         this.member.set(m);
         this.loading.set(false);
+        if (m) {
+          this.seo.update({
+            title: `${m.name} — ${m.role}`,
+            description: m.bio || `${m.name}, ${m.role} at Golden Zeal Pictures${m.location ? `, ${m.location}` : ''}.`,
+            path: `/crew/${m.slug}`,
+            image: m.photo_url,
+            type: 'profile',
+            jsonLd: {
+              '@context': 'https://schema.org',
+              '@type': 'Person',
+              name: m.name,
+              jobTitle: m.role,
+              url: `${SITE_URL}/crew/${m.slug}`,
+              ...(m.photo_url ? { image: m.photo_url } : {}),
+              ...(m.bio ? { description: m.bio } : {}),
+              ...(m.location ? { homeLocation: { '@type': 'Place', name: m.location } } : {}),
+              worksFor: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+            },
+          });
+        }
         if (m) {
           this.content.getProjectsByTeamMember(m.id).subscribe((p) => this.projects.set(p));
         }
