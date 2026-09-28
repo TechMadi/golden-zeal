@@ -1,24 +1,3 @@
-export interface Director {
-  id: string;
-  name: string;
-  slug: string;
-  bio: string | null;
-  location: string | null;
-  hero_image_url: string | null;
-  display_order: number;
-}
-
-export interface Photographer {
-  id: string;
-  name: string;
-  slug: string;
-  bio: string | null;
-  location: string | null;
-  specialty: string | null;
-  hero_image_url: string | null;
-  display_order: number;
-}
-
 export interface Project {
   id: string;
   title: string;
@@ -28,16 +7,14 @@ export interface Project {
   category: 'commercial' | 'cinematic' | 'music_video' | 'stills';
   sub_category: string | null;
   year: number | null;
-  director_id: string | null;
-  photographer_id: string | null;
   thumbnail_url: string | null;
   vimeo_id: string | null;
   youtube_id: string | null;
   featured: boolean;
   display_order: number;
   // joined
-  director?: Pick<Director, 'id' | 'name' | 'slug'>;
-  photographer?: Pick<Photographer, 'id' | 'name' | 'slug'>;
+  // derived client-side from the project's "Director" crew credits
+  directors?: string[];
   stills?: ProjectStill[];
   credits?: ProjectCredit[];
 }
@@ -76,6 +53,12 @@ export interface TeamMember {
   display_order: number;
   // joined
   credits?: Project[];
+}
+
+export interface CreditRole {
+  id: string;
+  name: string;
+  display_order: number;
 }
 
 export interface RegionalRep {

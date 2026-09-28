@@ -3,9 +3,9 @@ import { from, Observable, map } from 'rxjs';
 import { SupabaseService } from 'shared';
 import type { SiteSetting, Showreel, ProjectCredit } from 'shared';
 
-type Table = 'directors' | 'photographers' | 'projects' | 'project_stills' |
+type Table = 'projects' | 'project_stills' |
              'project_credits' | 'team_members' | 'regional_reps' | 'services' |
-             'faq' | 'site_settings' | 'showreel';
+             'faq' | 'site_settings' | 'showreel' | 'credit_roles';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
@@ -60,6 +60,13 @@ export class AdminSupabaseService {
   }
 
   // ── Project credits ────────────────────────────────────────
+  // Keep existing credits in sync when a credit role is renamed.
+  renameCreditRole(from: string, to: string): Observable<void> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_credits').update({ role: to }).eq('role', from)
+    ).pipe(map(() => undefined));
+  }
+
   listCredits(projectId: string): Observable<ProjectCredit[]> {
     return this.q<AnyRecord>(
       this.sb.from('project_credits')

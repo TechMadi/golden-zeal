@@ -12,9 +12,13 @@ export const routes: Routes = [
       import('./pages/commercial/commercial.component').then((m) => m.CommercialComponent),
   },
   {
-    path: 'cinematic',
+    path: 'narrative',
     loadComponent: () =>
       import('./pages/cinematic/cinematic.component').then((m) => m.CinematicComponent),
+  },
+  {
+    path: 'cinematic',
+    redirectTo: 'narrative',
   },
   {
     path: 'projects/:slug',
@@ -23,25 +27,19 @@ export const routes: Routes = [
   },
   {
     path: 'directors',
-    loadComponent: () =>
-      import('./pages/directors/directors.component').then((m) => m.DirectorsComponent),
+    redirectTo: 'crew',
   },
   {
     path: 'directors/:slug',
-    loadComponent: () =>
-      import('./pages/director-detail/director-detail.component').then((m) => m.DirectorDetailComponent),
+    redirectTo: 'crew',
   },
   {
     path: 'photographers',
-    loadComponent: () =>
-      import('./pages/photographers/photographers.component').then((m) => m.PhotographersComponent),
+    redirectTo: 'crew',
   },
   {
     path: 'photographers/:slug',
-    loadComponent: () =>
-      import('./pages/photographer-detail/photographer-detail.component').then(
-        (m) => m.PhotographerDetailComponent
-      ),
+    redirectTo: 'crew',
   },
   {
     path: 'crew',

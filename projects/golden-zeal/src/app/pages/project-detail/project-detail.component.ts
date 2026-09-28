@@ -89,24 +89,6 @@ import type { Project } from 'shared';
 
             <!-- Right: credits block -->
             <div appReveal class="reveal-delay-1" style="border-left: 1px solid var(--gz-border); padding-left: 2rem;">
-              @if (project()!.director) {
-                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
-                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Director</p>
-                  <a [routerLink]="['/directors', project()!.director!.slug]"
-                     class="text-base transition-colors hover:opacity-80" style="color: var(--gz-text);">
-                    {{ project()!.director!.name }}
-                  </a>
-                </div>
-              }
-              @if (project()!.photographer) {
-                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
-                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Photographer</p>
-                  <a [routerLink]="['/photographers', project()!.photographer!.slug]"
-                     class="text-base transition-colors hover:opacity-80" style="color: var(--gz-text);">
-                    {{ project()!.photographer!.name }}
-                  </a>
-                </div>
-              }
               @for (group of groupedCredits(); track group.role) {
                 <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">{{ group.role }}</p>
@@ -178,8 +160,8 @@ import type { Project } from 'shared';
                   </div>
                   <div class="card-overlay">
                     <div class="absolute bottom-0 left-0 p-4">
-                      @if (p.director) {
-                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ p.director.name }}</p>
+                      @if (p.directors?.length) {
+                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ p.directors!.join(', ') }}</p>
                       }
                       <p class="text-lg" style="color: var(--gz-text); font-family: 'Bebas Neue', sans-serif;">{{ p.title }}</p>
                     </div>

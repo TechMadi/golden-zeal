@@ -104,8 +104,8 @@ import type { ApprenticeshipCohort, Project, TeamMember } from 'shared';
                   </div>
                   <div class="card-overlay">
                     <div class="absolute bottom-0 left-0 p-5">
-                      @if (project.director) {
-                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ project.director.name }}</p>
+                      @if (project.directors?.length) {
+                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ project.directors!.join(', ') }}</p>
                       }
                       <p class="text-xl" style="color: var(--gz-text); font-family: 'Bebas Neue', sans-serif;">{{ project.title }}</p>
                       @if (project.client) {

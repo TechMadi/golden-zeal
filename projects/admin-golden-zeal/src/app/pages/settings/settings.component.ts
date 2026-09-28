@@ -12,6 +12,7 @@ const SETTING_KEYS = [
   { key: 'stat_projects',   label: 'Stat: Projects'  },
   { key: 'stat_awards',     label: 'Stat: Awards'    },
   { key: 'contact_phone',   label: 'Contact Phone'   },
+  { key: 'contact_phone_2', label: 'Contact Phone 2' },
   { key: 'contact_email',   label: 'Contact Email'   },
   { key: 'contact_address', label: 'Contact Address' },
 ];

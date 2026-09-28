@@ -90,7 +90,9 @@ import { environment } from '../../../environments/environment';
             <div class="space-y-6">
               <div appReveal style="border-bottom: 1px solid var(--gz-border);" class="pb-6">
                 <p class="text-xs tracking-[0.2em] uppercase mb-1" style="color: var(--gz-gold);">Phone</p>
-                <a href="tel:+254722833358" class="text-base transition-colors" style="color: var(--gz-text);">+254 722 833 358</a>
+                @for (phone of phones(); track phone) {
+                  <a [href]="telHref(phone)" class="text-base block transition-colors" style="color: var(--gz-text);">{{ phone }}</a>
+                }
               </div>
               <div appReveal style="border-bottom: 1px solid var(--gz-border);" class="pb-6">
                 <p class="text-xs tracking-[0.2em] uppercase mb-1" style="color: var(--gz-gold);">Email</p>
@@ -151,6 +153,7 @@ export class ContactComponent implements OnInit {
   private readonly posthogService = inject(PostHogService);
 
   reps = signal<RegionalRep[]>([]);
+  phones = signal<string[]>(['+254 722 833 358']);
   sending = signal(false);
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
@@ -180,6 +183,14 @@ export class ContactComponent implements OnInit {
 
   ngOnInit(): void {
     this.content.getReps().subscribe((r) => this.reps.set(r));
+    this.content.getSettings().subscribe((s) => {
+      const phones = [s['contact_phone'], s['contact_phone_2']].filter((p) => !!p?.trim());
+      if (phones.length) this.phones.set(phones);
+    });
+  }
+
+  telHref(phone: string): string {
+    return 'tel:' + phone.replace(/[^\d+]/g, '');
   }
 
   async onSubmit(): Promise<void> {

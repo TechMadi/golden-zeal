@@ -34,16 +34,6 @@ export const routes: Routes = [
           import('./pages/projects/project-form.component').then((m) => m.ProjectFormComponent),
       },
       {
-        path: 'directors',
-        loadComponent: () =>
-          import('./pages/directors/directors-admin.component').then((m) => m.DirectorsAdminComponent),
-      },
-      {
-        path: 'photographers',
-        loadComponent: () =>
-          import('./pages/photographers/photographers-admin.component').then((m) => m.PhotographersAdminComponent),
-      },
-      {
         path: 'team',
         loadComponent: () =>
           import('./pages/team/team-admin.component').then((m) => m.TeamAdminComponent),
@@ -52,6 +42,11 @@ export const routes: Routes = [
         path: 'reps',
         loadComponent: () =>
           import('./pages/reps/reps-admin.component').then((m) => m.RepsAdminComponent),
+      },
+      {
+        path: 'credit-roles',
+        loadComponent: () =>
+          import('./pages/credit-roles/credit-roles-admin.component').then((m) => m.CreditRolesAdminComponent),
       },
       {
         path: 'faq',
