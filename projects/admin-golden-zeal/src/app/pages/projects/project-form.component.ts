@@ -4,26 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
 import { PostHogService } from '../../services/posthog.service';
-import type { ProjectCredit, TeamMember } from 'shared';
-
-const CANONICAL_ROLES = [
-  'Director',
-  'DOP',
-  'Cinematographer',
-  'Producer',
-  'Client Producer',
-  'Grip',
-  'Lighting',
-  'Logistics',
-  'Production Assistant',
-  'Sound Engineer',
-  'DIT',
-  'Editor',
-  'Colorist',
-  'Graphics',
-  'Wardrobe',
-  'Talent Coordinator',
-];
+import type { CreditRole, ProjectCredit, TeamMember } from 'shared';
 
 const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
   commercial: [
@@ -41,9 +22,9 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink],
   template: `
-    <div class="p-6 md:p-10 max-w-2xl">
-      <div class="flex items-center gap-4 mb-8">
-        <a routerLink="/projects" class="text-xs tracking-widest uppercase" style="color:#8a9e90;">← Projects</a>
+    <div class="p-6 md:p-10">
+      <div class="mb-8">
+        <a routerLink="/projects" class="inline-block mb-3 text-xs tracking-widest uppercase" style="color:#8a9e90;">← Projects</a>
         <h1 class="text-3xl" style="font-family:'Bebas Neue',sans-serif; color:#F0EBE0;">
           {{ isEdit() ? 'EDIT PROJECT' : 'NEW PROJECT' }}
         </h1>
@@ -61,7 +42,10 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
         </div>
       }
 
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-10 xl:gap-24 items-start">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <h2 class="text-xl" style="font-family:'Bebas Neue',sans-serif; color:#F0EBE0;">PROJECT DETAILS</h2>
+
 
         <!-- Title -->
         <div>
@@ -189,14 +173,15 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
         </div>
       </form>
 
-      <!-- Crew Credits (Producer, Cinematographer, Grip, Editor, etc. — Director/Photographer above are separate) -->
+      <!-- Crew Credits — right column on wide screens, below the form otherwise -->
       @if (isEdit()) {
-        <div class="mt-12 pt-8" style="border-top:1px solid rgba(240,235,224,0.1);">
+        <div class="pt-8 border-t xl:w-3/4 xl:ml-auto xl:pt-0 xl:border-t-0 xl:sticky xl:top-10" style="border-color:rgba(240,235,224,0.1);">
           <h2 class="text-xl mb-6" style="font-family:'Bebas Neue',sans-serif; color:#F0EBE0;">CREW CREDITS</h2>
 
           <div class="mb-6 space-y-2">
             @for (c of credits(); track c.id) {
-              <div class="flex items-center justify-between p-3" style="background:#0f1f16; border:1px solid rgba(240,235,224,0.07);">
+              <div class="flex items-center justify-between p-3" style="background:#0f1f16;"
+                   [style.border]="'1px solid ' + (editingCreditId() === c.id ? '#C9A04A' : 'rgba(240,235,224,0.07)')">
                 <div>
                   <p class="text-sm" style="color:#F0EBE0;">{{ c.person_name }}</p>
                   <p class="text-xs" style="color:#8a9e90;">
@@ -206,7 +191,10 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
                     }
                   </p>
                 </div>
-                <button type="button" (click)="deleteCredit(c.id)" class="text-xs uppercase" style="color:#8a9e90;">Delete</button>
+                <div class="flex items-center gap-4">
+                  <button type="button" (click)="editCredit(c)" class="text-xs uppercase" style="color:#C9A04A;">Edit</button>
+                  <button type="button" (click)="deleteCredit(c.id)" class="text-xs uppercase" style="color:#8a9e90;">Delete</button>
+                </div>
               </div>
             }
             @if (credits().length === 0) {
@@ -214,8 +202,8 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
             }
           </div>
 
-          <form [formGroup]="creditForm" (ngSubmit)="onAddCredit()" class="flex flex-wrap items-end gap-3">
-            <div class="flex-1 min-w-[160px] relative role-combobox">
+          <form [formGroup]="creditForm" (ngSubmit)="onAddCredit()" class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <div class="relative role-combobox">
               <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Role</label>
               <input type="text" placeholder="e.g. Cinematographer"
                      [value]="roleQuery()"
@@ -235,7 +223,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
                 </div>
               }
             </div>
-            <div class="flex-1 min-w-[200px] relative team-member-combobox">
+            <div class="relative team-member-combobox">
               <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">
                 Link to Team Member <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(optional)</span>
               </label>
@@ -263,9 +251,13 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
                 </div>
               }
             </div>
-            <div class="flex-1 min-w-[220px]">
+            <div class="sm:col-span-2">
               <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">
-                Person Name(s) <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(comma-separate for multiple — unlinked only)</span>
+                @if (editingCreditId()) {
+                  Person Name
+                } @else {
+                  Person Name(s) <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(comma-separate for multiple — unlinked only)</span>
+                }
               </label>
               <input type="text" formControlName="person_name" placeholder="e.g. Paul Kanyiri, Julian Oburu"
                      [readOnly]="!!creditForm.get('team_member_id')?.value"
@@ -273,6 +265,7 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
                      [style.opacity]="creditForm.get('team_member_id')?.value ? '0.7' : '1'"
                      style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
             </div>
+            <div class="sm:col-span-2 flex items-end gap-3">
             <div class="w-24">
               <label class="block text-xs tracking-[0.2em] uppercase mb-1" style="color:#8a9e90;">Order</label>
               <input type="number" formControlName="display_order"
@@ -282,11 +275,20 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
             <button type="submit" [disabled]="!canAddCredit() || savingCredit()"
                     class="px-4 py-2 text-xs tracking-widest uppercase transition-colors"
                     style="background:#C9A04A; color:#0a150f;" [style.opacity]="!canAddCredit() || savingCredit() ? '0.6' : '1'">
-              Add
+              {{ editingCreditId() ? 'Update' : 'Add' }}
             </button>
+            @if (editingCreditId()) {
+              <button type="button" (click)="cancelEditCredit()"
+                      class="px-4 py-2 text-xs tracking-widest uppercase transition-colors"
+                      style="border:1px solid rgba(240,235,224,0.1); color:#8a9e90;">
+                Cancel
+              </button>
+            }
+            </div>
           </form>
         </div>
       }
+      </div>
     </div>
   `,
 })
@@ -308,6 +310,7 @@ export class ProjectFormComponent implements OnInit {
   selectedCategory = signal('commercial');
   credits = signal<ProjectCredit[]>([]);
   savingCredit = signal(false);
+  editingCreditId = signal<string | null>(null);
   private projectId = '';
 
   subCategoryOptions = computed(() => SUB_CATEGORIES[this.selectedCategory()] ?? []);
@@ -326,7 +329,7 @@ export class ProjectFormComponent implements OnInit {
     display_order:   [0],
   });
 
-  readonly canonicalRoles = CANONICAL_ROLES;
+  roles = signal<string[]>([]);
 
   creditForm = this.fb.nonNullable.group({
     role:            ['', Validators.required],
@@ -340,8 +343,8 @@ export class ProjectFormComponent implements OnInit {
 
   filteredRoles = computed(() => {
     const q = this.roleQuery().trim().toLowerCase();
-    if (!q) return this.canonicalRoles;
-    return this.canonicalRoles.filter((r) => r.toLowerCase().includes(q));
+    if (!q) return this.roles();
+    return this.roles().filter((r) => r.toLowerCase().includes(q));
   });
 
   onRoleQueryChange(value: string): void {
@@ -400,6 +403,7 @@ export class ProjectFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.admin.list<TeamMember>('team_members').subscribe((t) => this.teamMembers.set(t));
+    this.admin.list<CreditRole>('credit_roles').subscribe((r) => this.roles.set(r.map((x) => x.name)));
 
     // Auto-generate slug from title (new projects only)
     this.form.get('title')!.valueChanges.subscribe((title) => {
@@ -436,6 +440,10 @@ export class ProjectFormComponent implements OnInit {
 
   onAddCredit(): void {
     if (!this.canAddCredit() || this.savingCredit()) return;
+    if (this.editingCreditId()) {
+      this.onUpdateCredit(this.editingCreditId()!);
+      return;
+    }
 
     const { role, team_member_id, person_name, display_order } = this.creditForm.getRawValue();
     const resolvedRole = role.trim();
@@ -457,18 +465,60 @@ export class ProjectFormComponent implements OnInit {
     forkJoin(creates).subscribe({
       next: () => {
         this.savingCredit.set(false);
-        this.creditForm.reset({ role: '', team_member_id: '', person_name: '', display_order: 0 });
-        this.roleQuery.set('');
-        this.teamMemberQuery.set('');
+        this.resetCreditForm();
         this.loadCredits();
       },
       error: () => this.savingCredit.set(false),
     });
   }
 
+  editCredit(credit: ProjectCredit): void {
+    this.editingCreditId.set(credit.id);
+    this.creditForm.reset({
+      role: credit.role,
+      team_member_id: credit.team_member_id ?? '',
+      person_name: credit.person_name,
+      display_order: credit.display_order,
+    });
+    this.roleQuery.set(credit.role);
+    this.teamMemberQuery.set(credit.team_member?.name ?? '');
+  }
+
+  cancelEditCredit(): void {
+    this.resetCreditForm();
+  }
+
+  private onUpdateCredit(id: string): void {
+    const { role, team_member_id, person_name, display_order } = this.creditForm.getRawValue();
+    this.savingCredit.set(true);
+    this.admin.update('project_credits', id, {
+      role: role.trim(),
+      person_name: person_name.trim(),
+      team_member_id: team_member_id || null,
+      display_order,
+    }).subscribe({
+      next: () => {
+        this.savingCredit.set(false);
+        this.resetCreditForm();
+        this.loadCredits();
+      },
+      error: () => this.savingCredit.set(false),
+    });
+  }
+
+  private resetCreditForm(): void {
+    this.editingCreditId.set(null);
+    this.creditForm.reset({ role: '', team_member_id: '', person_name: '', display_order: 0 });
+    this.roleQuery.set('');
+    this.teamMemberQuery.set('');
+  }
+
   deleteCredit(id: string): void {
     if (!confirm('Delete this credit?')) return;
-    this.admin.delete('project_credits', id).subscribe(() => this.loadCredits());
+    this.admin.delete('project_credits', id).subscribe(() => {
+      if (this.editingCreditId() === id) this.resetCreditForm();
+      this.loadCredits();
+    });
   }
 
   async onFileChange(event: Event): Promise<void> {

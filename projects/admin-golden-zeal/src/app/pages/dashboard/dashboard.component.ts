@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
-import type { Project, Director, TeamMember } from 'shared';
+import type { Project, CreditRole, TeamMember } from 'shared';
 
 @Component({
   selector: 'app-dashboard',
@@ -47,14 +47,14 @@ export class DashboardComponent implements OnInit {
   private readonly admin = inject(AdminSupabaseService);
   stats = signal<{ label: string; value: number | string }[]>([
     { label: 'Projects',   value: '—' },
-    { label: 'Directors',  value: '—' },
+    { label: 'Credit Roles', value: '—' },
     { label: 'Team',       value: '—' },
     { label: 'FAQ Items',  value: '—' },
   ]);
 
   readonly actions = [
     { section: 'Projects',   label: 'Add New Project',   path: '/projects/new'   },
-    { section: 'Directors',  label: 'Add Director',      path: '/directors'      },
+    { section: 'Credits',    label: 'Manage Credit Roles', path: '/credit-roles' },
     { section: 'Team',       label: 'Add Team Member',   path: '/team'           },
     { section: 'Showreel',   label: 'Update Showreel',   path: '/showreel'       },
     { section: 'Settings',   label: 'Edit Site Settings',path: '/settings'       },
@@ -63,11 +63,11 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.admin.list<Project>('projects').subscribe((p) => {
-      this.admin.list<Director>('directors').subscribe((d) => {
+      this.admin.list<CreditRole>('credit_roles').subscribe((d) => {
         this.admin.list<TeamMember>('team_members').subscribe((t) => {
           this.stats.set([
             { label: 'Projects',  value: p.length },
-            { label: 'Directors', value: d.length },
+            { label: 'Credit Roles', value: d.length },
             { label: 'Team',      value: t.length },
             { label: 'FAQ Items', value: '—' },
           ]);

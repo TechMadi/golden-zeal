@@ -226,7 +226,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   readonly categories = [
     { path: '/commercial', label: 'COMMERCIAL' },
-    { path: '/cinematic',  label: 'CINEMATIC'  },
+    { path: '/narrative',  label: 'NARRATIVE'  },
   ];
 
   bgReelSrc(): SafeResourceUrl {

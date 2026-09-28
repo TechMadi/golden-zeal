@@ -32,10 +32,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-8">
 
-          <!-- Narratives -->
-          <a routerLink="/cinematic" routerLinkActive="!text-[#C9A04A]"
+          <!-- Narrative -->
+          <a routerLink="/narrative" routerLinkActive="!text-[#C9A04A]"
              class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
-             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">NARRATIVES</a>
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">NARRATIVE</a>
 
           <!-- Commercial (with dropdown) -->
           <div class="relative inline-flex dropdown-nav" (mouseenter)="openDropdown.set('commercial')" (mouseleave)="openDropdown.set(null)">
@@ -148,7 +148,7 @@ export class AppHeaderComponent {
   ];
 
   readonly mobileNav = [
-    { path: '/cinematic',      label: 'NARRATIVES',     sub: false, comingSoon: false, queryParams: undefined as Record<string, string> | undefined },
+    { path: '/narrative',      label: 'NARRATIVE',      sub: false, comingSoon: false, queryParams: undefined as Record<string, string> | undefined },
     { path: '/commercial',     label: 'COMMERCIAL',     sub: false, comingSoon: false, queryParams: undefined },
     { path: '/commercial',     label: 'ANIMATION',      sub: true,  comingSoon: false, queryParams: { filter: 'animations' } },
     { path: '/commercial',     label: 'TVC',             sub: true,  comingSoon: false, queryParams: { filter: 'tvc' } },

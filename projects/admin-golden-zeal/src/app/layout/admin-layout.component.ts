@@ -89,9 +89,8 @@ export class AdminLayoutComponent implements OnInit {
   readonly navItems: NavItem[] = [
     { label: 'Dashboard',     path: '/dashboard'    },
     { label: 'Projects',      path: '/projects'     },
-    { label: 'Directors',     path: '/directors'    },
-    { label: 'Photographers', path: '/photographers'},
     { label: 'Team',          path: '/team'         },
+    { label: 'Credit Roles',  path: '/credit-roles' },
     { label: 'Reps',          path: '/reps'         },
     { label: 'Services',      path: '/services'     },
     { label: 'FAQ',           path: '/faq'          },

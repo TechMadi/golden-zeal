@@ -2,8 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { from, Observable, map } from 'rxjs';
 import { SupabaseService } from 'shared';
 import type {
-  Director,
-  Photographer,
   Project,
   TeamMember,
   RegionalRep,
@@ -13,48 +11,34 @@ import type {
   ApprenticeshipCohort,
 } from 'shared';
 
+// Credits are pulled with project lists so cards can show who directed.
+const PROJECT_LIST_SELECT = '*, credits:project_credits(role,person_name,display_order)';
+
+// Fills `directors` from the project's "Director" crew credits, in credit order.
+function withDirectors(project: Project): Project {
+  const directors = [...(project.credits ?? [])]
+    .sort((a, b) => a.display_order - b.display_order)
+    .filter((c) => c.role.trim().toLowerCase() === 'director')
+    .map((c) => c.person_name);
+  return { ...project, directors };
+}
+
 @Injectable({ providedIn: 'root' })
 export class ContentService {
   private readonly sb = inject(SupabaseService).client;
-
-  // ── Directors ──────────────────────────────────────────────
-  getDirectors(): Observable<Director[]> {
-    return from(
-      this.sb.from('directors').select('*').order('display_order', { ascending: true })
-    ).pipe(map((r) => (r.data as Director[]) ?? []));
-  }
-
-  getDirectorBySlug(slug: string): Observable<Director | null> {
-    return from(
-      this.sb.from('directors').select('*').eq('slug', slug).maybeSingle()
-    ).pipe(map((r) => (r.data as Director) ?? null));
-  }
-
-  // ── Photographers ──────────────────────────────────────────
-  getPhotographers(): Observable<Photographer[]> {
-    return from(
-      this.sb.from('photographers').select('*').order('display_order', { ascending: true })
-    ).pipe(map((r) => (r.data as Photographer[]) ?? []));
-  }
-
-  getPhotographerBySlug(slug: string): Observable<Photographer | null> {
-    return from(
-      this.sb.from('photographers').select('*').eq('slug', slug).maybeSingle()
-    ).pipe(map((r) => (r.data as Photographer) ?? null));
-  }
 
   // ── Projects ───────────────────────────────────────────────
   getProjects(category?: string): Observable<Project[]> {
     let query = this.sb
       .from('projects')
-      .select('*, director:directors(id,name,slug), photographer:photographers(id,name,slug)')
+      .select(PROJECT_LIST_SELECT)
       .order('display_order', { ascending: true });
 
     if (category) {
       query = query.eq('category', category);
     }
 
-    return from(query).pipe(map((r) => (r.data as Project[]) ?? []));
+    return from(query).pipe(map((r) => ((r.data as unknown as Project[]) ?? []).map(withDirectors)));
   }
 
   getProjectBySlug(slug: string): Observable<Project | null> {
@@ -62,39 +46,18 @@ export class ContentService {
       this.sb
         .from('projects')
         .select(
-          '*, director:directors(id,name,slug), photographer:photographers(id,name,slug), stills:project_stills(*), credits:project_credits(*, team_member:team_members(id,name,slug))'
+          '*, stills:project_stills(*), credits:project_credits(*, team_member:team_members(id,name,slug))'
         )
         .eq('slug', slug)
         .maybeSingle()
     ).pipe(
       map((r) => {
         const project = r.data as Project | null;
-        if (project?.credits) {
-          project.credits = [...project.credits].sort((a, b) => a.display_order - b.display_order);
-        }
-        return project;
+        if (!project) return null;
+        project.credits = [...(project.credits ?? [])].sort((a, b) => a.display_order - b.display_order);
+        return withDirectors(project);
       })
     );
-  }
-
-  getProjectsByDirector(directorId: string): Observable<Project[]> {
-    return from(
-      this.sb
-        .from('projects')
-        .select('*')
-        .eq('director_id', directorId)
-        .order('display_order', { ascending: true })
-    ).pipe(map((r) => (r.data as Project[]) ?? []));
-  }
-
-  getProjectsByPhotographer(photographerId: string): Observable<Project[]> {
-    return from(
-      this.sb
-        .from('projects')
-        .select('*')
-        .eq('photographer_id', photographerId)
-        .order('display_order', { ascending: true })
-    ).pipe(map((r) => (r.data as Project[]) ?? []));
   }
 
   // ── Team ───────────────────────────────────────────────────
@@ -116,7 +79,7 @@ export class ContentService {
     return from(
       this.sb
         .from('project_credits')
-        .select('project:projects(*, director:directors(id,name,slug), photographer:photographers(id,name,slug))')
+        .select(`project:projects(${PROJECT_LIST_SELECT})`)
         .eq('team_member_id', teamMemberId)
     ).pipe(
       map((r) => {
@@ -127,7 +90,7 @@ export class ContentService {
           const p = row.project as Project | null;
           if (p && !seen.has(p.id)) {
             seen.add(p.id);
-            projects.push(p);
+            projects.push(withDirectors(p));
           }
         }
         return projects.sort((a, b) => a.display_order - b.display_order);
@@ -181,9 +144,9 @@ export class ContentService {
     return from(
       this.sb
         .from('cohort_projects')
-        .select('project:projects(*, director:directors(id,name,slug), photographer:photographers(id,name,slug))')
+        .select(`project:projects(${PROJECT_LIST_SELECT})`)
         .eq('cohort_id', cohortId)
-    ).pipe(map((r) => ((r.data as any[]) ?? []).map((row: any) => row.project).filter(Boolean)));
+    ).pipe(map((r) => ((r.data as any[]) ?? []).map((row: any) => row.project).filter(Boolean).map(withDirectors)));
   }
 
   getCohortMembers(cohortId: string): Observable<{ role: string; member: TeamMember }[]> {

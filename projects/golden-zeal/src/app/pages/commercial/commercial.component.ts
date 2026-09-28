@@ -1,6 +1,5 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
@@ -20,8 +19,6 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
       gap: 16px;
       padding: 16px;
     }
-    .card-full  { grid-column: 1 / -1; }
-    .card-half  { grid-column: span 1; }
 
     .work-card {
       position: relative;
@@ -83,31 +80,10 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
       flex-shrink: 0;
     }
 
-    /* Aspect ratios */
-    .aspect-hero  { aspect-ratio: 16 / 6; }
     .aspect-half  { aspect-ratio: 16 / 9; }
-
-    .bg-video-wrap {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-    .bg-video-wrap iframe {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: 177.78vh;
-      height: 100vh;
-      min-width: 100%;
-      min-height: 56.25vw;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-    }
 
     @media (max-width: 640px) {
       .work-grid { grid-template-columns: 1fr; gap: 12px; padding: 12px; }
-      .card-full, .card-half { grid-column: 1 / -1; }
-      .aspect-hero { aspect-ratio: 16 / 9; }
-      .bg-video-wrap { display: none; }
     }
   `],
   template: `
@@ -144,44 +120,25 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
         </div>
       </div>
 
-      <!-- Mixed grid -->
+      <!-- Two-column grid -->
       <div class="px-0 pb-16">
         @if (loading()) {
           <div class="work-grid px-6 md:px-10">
-            <div class="card-full aspect-hero skeleton"></div>
-            <div class="card-half aspect-half skeleton"></div>
-            <div class="card-half aspect-half skeleton"></div>
-            <div class="card-half aspect-half skeleton"></div>
-            <div class="card-half aspect-half skeleton"></div>
+            <div class="aspect-half skeleton"></div>
+            <div class="aspect-half skeleton"></div>
+            <div class="aspect-half skeleton"></div>
+            <div class="aspect-half skeleton"></div>
           </div>
         } @else if (visible().length === 0) {
           <p class="text-center py-24" style="color: var(--gz-muted);">No projects yet.</p>
         } @else {
           <div class="work-grid">
-            @for (project of visible(); track project.id; let i = $index) {
+            @for (project of visible(); track project.id) {
               <a
                 [routerLink]="['/projects', project.slug]"
-                class="work-card"
-                [class.card-full]="isHero(i)"
-                [class.card-half]="!isHero(i)"
-                [class.aspect-hero]="isHero(i)"
-                [class.aspect-half]="!isHero(i)"
+                class="work-card aspect-half"
               >
-                @if (isHero(i) && hasVideo(project)) {
-                  <!-- Background video for hero cards -->
-                  @if (project.thumbnail_url) {
-                    <img [src]="project.thumbnail_url" [alt]="project.title" loading="lazy" />
-                  }
-                  <div class="bg-video-wrap">
-                    <iframe
-                      [src]="bgVideoSrc(project)"
-                      frameborder="0"
-                      allow="autoplay; fullscreen"
-                      loading="lazy"
-                      title=""
-                    ></iframe>
-                  </div>
-                } @else if (project.thumbnail_url) {
+                @if (project.thumbnail_url) {
                   <img [src]="project.thumbnail_url" [alt]="project.title" loading="lazy" />
                 } @else {
                   <div class="w-full h-full flex items-center justify-center" style="background: var(--gz-surface2);">
@@ -195,9 +152,9 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
                       <p class="card-client">{{ project.client }}</p>
                     }
                   </div>
-                  @if (project.director) {
+                  @if (project.directors?.length) {
                     <div class="card-director">
-                      {{ project.director.name }}
+                      {{ project.directors!.join(', ') }}
                     </div>
                   }
                 </div>
@@ -214,30 +171,12 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
 })
 export class CommercialComponent implements OnInit {
   private readonly content = inject(ContentService);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly route = inject(ActivatedRoute);
 
   projects = signal<Project[]>([]);
   loading = signal(true);
   activeFilter = signal<string>('ALL');
   readonly filters = [...FILTERS];
-
-  isHero(i: number): boolean { return i % 5 === 0; }
-
-  bgVideoSrc(project: Project): SafeResourceUrl {
-    if (project.youtube_id) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(
-        `https://www.youtube.com/embed/${project.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${project.youtube_id}&controls=0&disablekb=1&modestbranding=1`
-      );
-    }
-    return this.sanitizer.bypassSecurityTrustResourceUrl(
-      `https://player.vimeo.com/video/${project.vimeo_id}?background=1&autoplay=1&loop=1&muted=1`
-    );
-  }
-
-  hasVideo(project: Project): boolean {
-    return !!(project.vimeo_id || project.youtube_id);
-  }
 
   visible = computed(() => {
     const f = this.activeFilter();
