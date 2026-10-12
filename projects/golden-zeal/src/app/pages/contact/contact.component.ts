@@ -162,7 +162,6 @@ export class ContactComponent implements OnInit {
     { name: 'name',    label: 'Name',            type: 'text',     required: true,  error: 'Name is required' },
     { name: 'email',   label: 'Email',           type: 'email',    required: true,  error: 'Valid email required' },
     { name: 'phone',   label: 'Phone',           type: 'tel',      required: false, error: '' },
-    { name: 'phone2',  label: 'Alternate Phone', type: 'tel',      required: false, error: '' },
     { name: 'message', label: 'Message',         type: 'textarea', required: true,  error: 'Message is required' },
   ];
 
@@ -177,7 +176,6 @@ export class ContactComponent implements OnInit {
     name:    ['', Validators.required],
     email:   ['', [Validators.required, Validators.email]],
     phone:   [''],
-    phone2:  [''],
     message: ['', Validators.required],
   });
 
@@ -206,7 +204,6 @@ export class ContactComponent implements OnInit {
           from_name:  this.form.getRawValue().name,
           from_email: this.form.getRawValue().email,
           phone:      this.form.getRawValue().phone || '',
-          phone2:     this.form.getRawValue().phone2 || '',
           message:    this.form.getRawValue().message,
         },
         publicKey

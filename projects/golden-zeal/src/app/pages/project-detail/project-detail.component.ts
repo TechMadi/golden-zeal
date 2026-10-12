@@ -32,12 +32,15 @@ import type { Project } from 'shared';
         <!-- ── VIDEO HERO ── -->
         <div class="w-full" style="background: #000;">
           @if (project()!.vimeo_id || project()!.youtube_id) {
-            <!-- Shown as cinema widescreen (2.4:1). Many reels are letterboxed inside a 16:9 frame,
-                 so the 16:9 player is centred and its top/bottom (the black bars) cropped off. -->
-            <div class="w-full relative overflow-hidden" style="aspect-ratio: 2.4 / 1;" #videoSection>
+            <!-- Shown as cinema widescreen (2.4:1), but never shorter than 40% of the screen height —
+                 on narrow screens 2.4:1 alone is a thin strip. Many reels are letterboxed inside a 16:9
+                 frame, so the 16:9 player is sized for its 2.4:1 picture to cover the box, centred, and
+                 the overflow (black bars, plus the sides on tall boxes) is cropped off. -->
+            <div class="w-full relative overflow-hidden" style="height: max(41.667vw, 40vh);" #videoSection>
               <iframe
                 [src]="videoUrl()"
-                class="absolute left-0 top-1/2 -translate-y-1/2 w-full aspect-video"
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 aspect-video"
+                style="width: max(100vw, 96vh);"
                 frameborder="0"
                 tabindex="-1"
                 allow="autoplay; fullscreen; picture-in-picture"
