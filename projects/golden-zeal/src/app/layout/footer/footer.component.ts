@@ -8,9 +8,9 @@ import { RouterLink } from '@angular/router';
   template: `
     <footer style="background: var(--gz-black); border-top: 1px solid var(--gz-border);" class="pt-16 pb-8 px-6 md:px-10">
       <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 mb-16">
           <!-- Brand -->
-          <div class="space-y-4">
+          <div class="col-span-2 md:col-span-1 space-y-4">
             <img src="assets/brand/full_logo.png" alt="Golden Zeal Pictures" class="h-10 w-auto" />
             <p class="text-sm leading-relaxed max-w-xs" style="color: var(--gz-muted);">
               Film &amp; Television Production Across Africa and Beyond.
@@ -25,8 +25,16 @@ import { RouterLink } from '@angular/router';
             }
           </div>
 
-          <!-- Contact -->
+          <!-- Coming soon -->
           <div class="space-y-3">
+            <p class="text-xs tracking-[0.2em] uppercase mb-5" style="color: var(--gz-gold);">Coming Soon</p>
+            @for (item of comingSoon; track item) {
+              <p class="text-sm" style="color: var(--gz-muted);">{{ item }}</p>
+            }
+          </div>
+
+          <!-- Contact -->
+          <div class="col-span-2 md:col-span-1 space-y-3">
             <p class="text-xs tracking-[0.2em] uppercase mb-5" style="color: var(--gz-gold);">Get In Touch</p>
             <p class="text-sm" style="color: var(--gz-muted);">Nairobi, Kenya</p>
             <a href="tel:+254722833358" class="block text-sm transition-colors" style="color: var(--gz-muted);">+254 722 833 358</a>
@@ -58,9 +66,10 @@ export class AppFooterComponent {
     { path: '/narrative',     label: 'Narrative' },
     { path: '/commercial',    label: 'Commercial' },
     { path: '/crew',          label: 'Crew' },
-    { path: '/apprenticeship', label: 'Apprenticeship' },
     { path: '/contact',        label: 'Contact' },
   ];
+
+  readonly comingSoon = ['Apprenticeship', 'Screening'];
 
   readonly socials = [
     { href: 'https://www.instagram.com/goldenzealpictures/', label: 'IG' },

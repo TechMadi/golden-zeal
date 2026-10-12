@@ -64,23 +64,18 @@ import type { Showreel } from 'shared';
       }
 
       <!-- Hero content -->
-      <div class="relative z-10 flex-1 flex flex-col justify-end px-6 md:px-10 pb-6 md:pb-8">
+      <div class="relative z-10 flex-1 flex flex-col justify-end px-6 md:px-10 pb-20 md:pb-28">
         <div class="max-w-7xl w-full mx-auto">
-          <p appReveal class="text-xs tracking-[0.3em] uppercase mb-4" style="color: var(--gz-gold);">
-            Film &amp; Television Production · Nairobi, Kenya
+          <p appReveal class="text-sm md:text-base tracking-[0.3em] uppercase mb-4" style="color: var(--gz-text);">
+            Golden Zeal Pictures
           </p>
           <h1
             appReveal
-            class="leading-none mb-6 reveal-delay-1"
-            style="font-size: clamp(3.5rem, 10vw, 10rem); color: var(--gz-text);"
+            class="leading-none mb-8 reveal-delay-1"
+            style="font-size: clamp(2.75rem, 7vw, 7rem); color: var(--gz-gold); max-width: 16ch;"
           >
-            GOLDEN ZEAL<br />PICTURES
+            {{ heroTagline() }}
           </h1>
-          @if (heroTagline()) {
-            <p appReveal class="text-lg md:text-2xl leading-snug mb-8 reveal-delay-2" style="color: var(--gz-text); max-width: 40rem;">
-              {{ heroTagline() }}
-            </p>
-          }
           <div appReveal class="flex flex-wrap gap-4 reveal-delay-2">
             <a routerLink="/commercial" class="btn-gold">View Our Work</a>
             <a routerLink="/contact" class="btn-outline">Start a Project</a>
@@ -88,8 +83,8 @@ import type { Showreel } from 'shared';
         </div>
       </div>
 
-      <!-- ── Bottom reel strip ── -->
-      @if (reels().length > 0) {
+      <!-- ── Bottom reel strip — only useful when there are reels to switch between ── -->
+      @if (reels().length > 1) {
         <div class="relative z-10 border-t" style="border-color: rgba(255,255,255,0.06);">
           <div class="grid" [style.grid-template-columns]="'repeat(' + reels().length + ', 1fr)'">
             @for (reel of reels(); track reel.id; let i = $index) {
@@ -167,18 +162,6 @@ import type { Showreel } from 'shared';
       </div>
     </section>
 
-    <!-- ── STATS ── -->
-    <section class="py-16 px-6 md:px-10" style="background: var(--gz-black); border-top: 1px solid var(--gz-border);">
-      <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-0">
-        @for (stat of stats; track stat.label) {
-          <div appReveal class="text-center md:border-r last:border-r-0 md:px-8" style="border-color: var(--gz-border);">
-            <p class="text-4xl md:text-6xl mb-2" style="color: var(--gz-gold); font-family: 'Bebas Neue', sans-serif;">{{ stat.value }}</p>
-            <p class="text-xs tracking-[0.2em] uppercase" style="color: var(--gz-muted);">{{ stat.label }}</p>
-          </div>
-        }
-      </div>
-    </section>
-
     <!-- ── WORK CATEGORIES ── -->
     <section class="py-20 md:py-28 px-6 md:px-10" style="background: var(--gz-surface);">
       <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-1">
@@ -214,7 +197,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     projects throughout East, Central, West and Southern Africa, and Southeast Asia — driven by a
     simple belief: the most powerful stories are those that reveal the human spirit.`
   );
-  heroTagline = signal('We tell the most compelling stories for global audiences.');
+  heroTagline = signal('Film & Television Production Across Africa and Beyond');
   progressKey = signal(0);
   reelOpen    = signal(false);
 
@@ -222,13 +205,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   readonly reelDuration = 30;
   private timer: ReturnType<typeof setInterval> | null = null;
-
-  readonly stats = [
-    { value: '2024', label: 'Founded' },
-    { value: '16+',  label: 'Producers' },
-    { value: '300+', label: 'Projects' },
-    { value: '2',    label: 'Awards' },
-  ];
 
   readonly categories = [
     { path: '/commercial', label: 'COMMERCIAL' },

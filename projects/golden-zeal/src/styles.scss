@@ -155,10 +155,10 @@ select:focus-visible {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 177.78vh;
-  height: 100vh;
-  min-width: 100%;
-  min-height: 56.25vw;
+  /* The reel is letterboxed (~2.4:1 inside a 16:9 frame), so size the
+     iframe until the picture itself — not the frame — covers the hero. */
+  width: max(100vw, 240vh);
+  height: max(56.25vw, 135vh);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
