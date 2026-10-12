@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ContentService } from '../../core/services/content.service';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -37,7 +38,9 @@ import { RouterLink } from '@angular/router';
           <div class="col-span-2 md:col-span-1 space-y-3">
             <p class="text-xs tracking-[0.2em] uppercase mb-5" style="color: var(--gz-gold);">Get In Touch</p>
             <p class="text-sm" style="color: var(--gz-muted);">Nairobi, Kenya</p>
-            <a href="tel:+254722833358" class="block text-sm transition-colors" style="color: var(--gz-muted);">+254 722 833 358</a>
+            @for (phone of phones(); track phone) {
+              <a [href]="telHref(phone)" class="block text-sm transition-colors" style="color: var(--gz-muted);">{{ phone }}</a>
+            }
             <a href="mailto:info@goldenzealpictures.co.ke" class="block text-sm transition-colors" style="color: var(--gz-muted);">info&#64;goldenzealpictures.co.ke</a>
             <div class="flex gap-5 pt-2">
               @for (social of socials; track social.label) {
@@ -59,8 +62,12 @@ import { RouterLink } from '@angular/router';
     </footer>
   `,
 })
-export class AppFooterComponent {
+export class AppFooterComponent implements OnInit {
+  private readonly content = inject(ContentService);
+
   readonly year = new Date().getFullYear();
+  // Both numbers come from CRM Settings (Contact Phone / Contact Phone 2); this is the fallback.
+  phones = signal<string[]>(['+254 722 833 358']);
 
   readonly navLinks = [
     { path: '/narrative',     label: 'Narrative' },
@@ -77,4 +84,15 @@ export class AppFooterComponent {
     { href: 'https://www.linkedin.com/company/golden-zeal-pictures/', label: 'LI' },
     { href: 'https://www.tiktok.com/@golden.zeal.pictures',  label: 'TT' },
   ];
+
+  ngOnInit(): void {
+    this.content.getSettings().subscribe((s) => {
+      const phones = [s['contact_phone'], s['contact_phone_2']].filter((p) => !!p?.trim());
+      if (phones.length) this.phones.set(phones);
+    });
+  }
+
+  telHref(phone: string): string {
+    return 'tel:' + phone.replace(/[^\d+]/g, '');
+  }
 }
