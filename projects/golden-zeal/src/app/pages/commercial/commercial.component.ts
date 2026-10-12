@@ -57,28 +57,6 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
       margin-bottom: 3px;
       letter-spacing: 0.01em;
     }
-    .card-client {
-      font-size: 0.65rem;
-      color: rgba(240,235,224,0.55);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-director {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      white-space: nowrap;
-      font-size: 0.65rem;
-      color: var(--gz-gold);
-    }
-    .card-director-logo {
-      height: 14px;
-      width: auto;
-      filter: brightness(0) invert(1);
-      flex-shrink: 0;
-    }
 
     .aspect-half  { aspect-ratio: 16 / 9; }
 
@@ -148,15 +126,7 @@ const FILTERS = ['ALL', 'TVC', 'ANIMATIONS'] as const;
                 <div class="card-overlay-bar">
                   <div class="card-meta-left">
                     <p class="card-title">{{ project.title }}</p>
-                    @if (project.client) {
-                      <p class="card-client">{{ project.client }}</p>
-                    }
                   </div>
-                  @if (project.directors?.length) {
-                    <div class="card-director">
-                      {{ project.directors!.join(', ') }}
-                    </div>
-                  }
                 </div>
               </a>
             }

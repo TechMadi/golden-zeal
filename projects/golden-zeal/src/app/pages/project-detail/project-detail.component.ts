@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject, effect, ElementRef, ViewChild, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, OnInit, OnDestroy, signal, computed, inject, effect, ElementRef, ViewChild, HostListener, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
@@ -13,7 +13,7 @@ import type { Project } from 'shared';
 @Component({
   selector: 'app-project-detail',
   standalone: true,
-  imports: [RouterLink, AppHeaderComponent, AppFooterComponent, RevealDirective],
+  imports: [RouterLink, NgTemplateOutlet, AppHeaderComponent, AppFooterComponent, RevealDirective],
   template: `
     <app-header />
 
@@ -30,19 +30,35 @@ import type { Project } from 'shared';
       } @else {
 
         <!-- ── VIDEO HERO ── -->
-        <div class="w-full pt-16" style="background: #000;">
+        <div class="w-full" style="background: #000;">
           @if (project()!.vimeo_id || project()!.youtube_id) {
-            <div class="aspect-video w-full relative" #videoSection>
+            <!-- Shown as cinema widescreen (2.4:1). Many reels are letterboxed inside a 16:9 frame,
+                 so the 16:9 player is centred and its top/bottom (the black bars) cropped off. -->
+            <div class="w-full relative overflow-hidden" style="aspect-ratio: 2.4 / 1;" #videoSection>
               <iframe
                 [src]="videoUrl()"
-                class="w-full h-full"
+                class="absolute left-0 top-1/2 -translate-y-1/2 w-full aspect-video"
                 frameborder="0"
                 tabindex="-1"
                 allow="autoplay; fullscreen; picture-in-picture"
                 [title]="project()!.title"
               ></iframe>
-              <!-- Transparent overlay — intercepts mouse events so native Vimeo/YouTube controls never appear -->
-              <div class="absolute inset-0" style="z-index: 1;"></div>
+              <!-- Transparent overlay — intercepts mouse events so native Vimeo/YouTube controls never appear.
+                   The top fade keeps the nav readable over bright footage. -->
+              <div class="absolute inset-0" style="z-index: 1; background: linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 22%);"></div>
+              <!-- Watch Film — opens the full, uncropped video with sound and controls -->
+              <button
+                type="button"
+                (click)="openFilm()"
+                class="absolute bottom-4 left-4 md:left-10 flex items-center gap-3 group"
+                style="z-index: 2;"
+              >
+                <span class="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 group-hover:scale-110"
+                      style="border: 1px solid rgba(240,235,224,0.35); color: var(--gz-text); background: rgba(0,0,0,0.35);">
+                  <svg width="11" height="13" viewBox="0 0 12 14" fill="currentColor"><path d="M1 1l10 6-10 6V1z"/></svg>
+                </span>
+                <span class="text-xs tracking-[0.2em] uppercase" style="color: var(--gz-text);">Watch Film</span>
+              </button>
               <!-- Mute toggle (above overlay) -->
               <button
                 type="button"
@@ -72,55 +88,77 @@ import type { Project } from 'shared';
           }
         </div>
 
-        <!-- ── TITLE + CREDITS ── -->
-        <div class="px-6 md:px-10 py-14 max-w-7xl mx-auto">
-          <div class="grid md:grid-cols-[1fr_280px] gap-10 items-start">
+        <!-- ── TITLE ── -->
+        <div class="px-6 md:px-10 pt-14 max-w-7xl mx-auto">
+          <p appReveal class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">{{ project()!.category }}</p>
+          <h1 appReveal class="mb-10 reveal-delay-1" style="font-size: clamp(2.5rem, 6vw, 5rem); color: var(--gz-text); line-height: 1.05;">
+            {{ project()!.title }}
+          </h1>
+        </div>
 
-            <!-- Left: title + description -->
+        <!-- ── DETAILS ──
+             With a description: description on the left; client, year and crew stacked on the right.
+             Without one: the crew fills the left; client and year stay on the right. -->
+        <div class="px-6 md:px-10 pb-14 max-w-7xl mx-auto">
+          <div class="grid md:grid-cols-[1fr_280px] gap-10 items-stretch">
+
+            <!-- Left -->
             <div>
-              <p appReveal class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">{{ project()!.category }}</p>
-              <h1 appReveal class="mb-6 reveal-delay-1" style="font-size: clamp(2.5rem, 6vw, 5rem); color: var(--gz-text); line-height: 1.05;">
-                {{ project()!.title }}
-              </h1>
               @if (project()!.description) {
                 <p appReveal class="text-base md:text-lg leading-relaxed reveal-delay-2" style="color: var(--gz-muted); max-width: 600px;">
                   {{ project()!.description }}
                 </p>
+              } @else if (groupedCredits().length > 0) {
+                <p appReveal class="text-xs tracking-[0.3em] uppercase mb-2" style="color: var(--gz-gold);">Crew</p>
+                <div appReveal class="grid grid-cols-1 sm:grid-cols-2 gap-x-10 reveal-delay-1">
+                  @for (group of groupedCredits(); track group.role) {
+                    <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
+                      <ng-container *ngTemplateOutlet="creditTpl; context: { $implicit: group }" />
+                    </div>
+                  }
+                </div>
               }
             </div>
 
-            <!-- Right: credits block -->
-            <div appReveal class="reveal-delay-1" style="border-left: 1px solid var(--gz-border); padding-left: 2rem;">
-              @for (group of groupedCredits(); track group.role) {
-                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
-                  <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">{{ group.role }}</p>
-                  <p class="text-base" style="color: var(--gz-text);">
-                    @for (entry of group.entries; track entry.name; let last = $last) {
-                      @if (entry.slug) {
-                        <a [routerLink]="['/crew', entry.slug]" class="transition-colors hover:opacity-80" style="color: var(--gz-text);">{{ entry.name }}</a>
-                      } @else {
-                        {{ entry.name }}
-                      }
-                      @if (!last) {<span>, </span>}
-                    }
-                  </p>
-                </div>
-              }
+            <!-- Right -->
+            <div appReveal class="reveal-delay-1 md:border-l md:pl-8" style="border-color: var(--gz-border);">
               @if (project()!.client) {
-                <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
+                <div class="pb-4 mb-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Client</p>
                   <p class="text-base" style="color: var(--gz-text);">{{ project()!.client }}</p>
                 </div>
               }
               @if (project()!.year) {
-                <div class="py-4">
+                <div class="pb-4 mb-4" style="border-bottom: 1px solid var(--gz-border);">
                   <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">Year</p>
                   <p class="text-base" style="color: var(--gz-text);">{{ project()!.year }}</p>
                 </div>
               }
+              @if (project()!.description && groupedCredits().length > 0) {
+                <p class="text-xs tracking-[0.3em] uppercase mt-8 mb-2" style="color: var(--gz-gold);">Crew</p>
+                @for (group of groupedCredits(); track group.role) {
+                  <div class="py-4" style="border-bottom: 1px solid var(--gz-border);">
+                    <ng-container *ngTemplateOutlet="creditTpl; context: { $implicit: group }" />
+                  </div>
+                }
+              }
             </div>
           </div>
         </div>
+
+        <ng-template #creditTpl let-group>
+          <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-muted);">{{ group.role }}</p>
+          <p class="text-base" style="color: var(--gz-text);">
+            @for (entry of group.entries; track entry.name; let last = $last) {
+              @if (entry.slug) {
+                <a [routerLink]="['/crew', entry.slug]" class="transition-colors hover:opacity-80" style="color: var(--gz-text);">{{ entry.name }}</a>
+              } @else {
+                {{ entry.name }}
+              }
+              @if (!last) {<span>, </span>}
+            }
+          </p>
+        </ng-template>
 
         <!-- ── BEHIND THE SCENES ── -->
         @if (bts().length > 0) {
@@ -144,32 +182,51 @@ import type { Project } from 'shared';
           </div>
         }
 
-        <!-- ── MORE WORK ── -->
+        <!-- ── SIMILAR WORK — top 4 by similarity, 2×2 grid ── -->
         @if (related().length > 0) {
           <div class="px-6 md:px-10 py-16 max-w-7xl mx-auto" style="border-top: 1px solid var(--gz-border);">
-            <h2 appReveal class="text-4xl mb-10" style="color: var(--gz-text);">MORE WORK</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <p appReveal class="text-xs tracking-[0.3em] uppercase mb-3" style="color: var(--gz-gold);">Explore</p>
+            <h2 appReveal class="text-4xl md:text-5xl mb-10 reveal-delay-1" style="color: var(--gz-text);">SIMILAR WORK</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               @for (p of related(); track p.id) {
-                <a [routerLink]="['/projects', p.slug]" appReveal class="project-card block">
-                  <div class="aspect-[4/3] overflow-hidden" style="background: var(--gz-surface);">
-                    @if (p.thumbnail_url) {
-                      <img [src]="p.thumbnail_url" [alt]="p.title" class="w-full h-full object-cover" loading="lazy" />
-                    } @else {
-                      <div class="w-full h-full flex items-center justify-center" style="background: var(--gz-surface2);">
-                        <span style="color: var(--gz-border); font-family: 'Bebas Neue', sans-serif;">GZP</span>
-                      </div>
-                    }
-                  </div>
-                  <div class="card-overlay">
-                    <div class="absolute bottom-0 left-0 p-4">
-                      @if (p.directors?.length) {
-                        <p class="text-xs tracking-widest uppercase mb-1" style="color: var(--gz-gold);">{{ p.directors!.join(', ') }}</p>
-                      }
-                      <p class="text-lg" style="color: var(--gz-text); font-family: 'Bebas Neue', sans-serif;">{{ p.title }}</p>
+                <a [routerLink]="['/projects', p.slug]" [attr.aria-label]="p.title" appReveal class="project-card group relative block aspect-video overflow-hidden" style="background: var(--gz-surface);">
+                  @if (p.thumbnail_url) {
+                    <img [src]="p.thumbnail_url" [alt]="p.title" class="w-full h-full object-cover transition-transform duration-500" loading="lazy" />
+                  } @else {
+                    <div class="w-full h-full flex items-center justify-center" style="background: var(--gz-surface2);">
+                      <span style="font-size: 2rem; color: var(--gz-border); font-family: 'Bebas Neue', sans-serif;">GZP</span>
                     </div>
-                  </div>
+                  }
                 </a>
               }
+            </div>
+          </div>
+        }
+
+        <!-- ── Full film lightbox ── -->
+        @if (filmOpen()) {
+          <div
+            class="fixed inset-0 z-[60] flex items-center justify-center"
+            style="background: rgba(0,0,0,0.92);"
+            (click)="closeFilm()"
+          >
+            <button
+              type="button"
+              (click)="closeFilm()"
+              class="absolute top-6 right-8 text-2xl leading-none"
+              style="color: rgba(240,235,224,0.5);"
+              aria-label="Close"
+            >✕</button>
+            <!-- stop click bubbling so clicking the video doesn't close it -->
+            <div class="w-full max-w-6xl mx-6 aspect-video" (click)="$event.stopPropagation()">
+              <iframe
+                [src]="filmUrl()"
+                class="w-full h-full"
+                frameborder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowfullscreen
+                [title]="project()!.title"
+              ></iframe>
             </div>
           </div>
         }
@@ -193,6 +250,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
   related = signal<Project[]>([]);
   loading = signal(true);
   isMuted = signal(true);
+  filmOpen = signal(false);
 
   private scrollObserver?: IntersectionObserver;
 
@@ -240,6 +298,37 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       `https://player.vimeo.com/video/${p.vimeo_id}?autoplay=1&muted=1&loop=1&title=0&byline=0&portrait=0&badge=0&autopause=0&playsinline=1`
     );
   });
+
+  // Full player for the lightbox: with sound and native controls, unlike the cropped background loop.
+  filmUrl = computed((): SafeResourceUrl => {
+    const p = this.project();
+    if (!p) return '';
+    if (p.youtube_id) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(
+        `https://www.youtube.com/embed/${p.youtube_id}?autoplay=1&rel=0&modestbranding=1`
+      );
+    }
+    return this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://player.vimeo.com/video/${p.vimeo_id}?autoplay=1&badge=0&title=0&byline=0&portrait=0`
+    );
+  });
+
+  openFilm(): void {
+    // Silence the background loop so the two don't play over each other
+    this.postMuteMessage(true);
+    this.isMuted.set(true);
+    this.filmOpen.set(true);
+    this.posthogService.posthog.capture('project_film_opened', { project_slug: this.project()?.slug });
+  }
+
+  closeFilm(): void {
+    this.filmOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.filmOpen()) this.closeFilm();
+  }
 
   toggleMute(): void {
     if (this.isMuted()) {
@@ -293,6 +382,7 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
       const slug = params.get('slug') ?? '';
       this.loading.set(true);
       this.isMuted.set(true);
+      this.filmOpen.set(false);
       this.scrollObserver?.disconnect();
       this.content.getProjectBySlug(slug).subscribe((p) => {
         this.project.set(p);
@@ -315,8 +405,8 @@ export class ProjectDetailComponent implements OnInit, OnDestroy {
             project_category: p.category,
             has_video: !!(p.vimeo_id || p.youtube_id),
           });
-          this.content.getProjects(p.category).subscribe((all) => {
-            this.related.set(all.filter((r) => r.id !== p.id).slice(0, 3));
+          this.content.getProjects().subscribe((all) => {
+            this.related.set(similarProjects(p, all, 4));
           });
         }
       });
@@ -375,4 +465,27 @@ function projectJsonLd(p: Project, description: string): Record<string, unknown>
     ],
   };
   return [work, breadcrumbs];
+}
+
+// Ranks other projects by how much they have in common with `p`: same category weighs most,
+// then same client / sub-category, then shared crew. Ties keep the CMS display order.
+function similarProjects(p: Project, all: Project[], limit: number): Project[] {
+  const norm = (v: string | null | undefined) => (v ?? '').trim().toLowerCase();
+  const crew = new Set((p.credits ?? []).map((c) => norm(c.person_name)));
+  const score = (r: Project) => {
+    let s = 0;
+    if (r.category === p.category) s += 10;
+    if (p.client && norm(r.client) === norm(p.client)) s += 4;
+    if (p.sub_category && norm(r.sub_category) === norm(p.sub_category)) s += 3;
+    const shared = new Set((r.credits ?? []).map((c) => norm(c.person_name)).filter((n) => crew.has(n)));
+    s += Math.min(shared.size, 3);
+    if (r.thumbnail_url) s += 1; // a card with an image beats a blank placeholder
+    return s;
+  };
+  return all
+    .filter((r) => r.id !== p.id)
+    .map((r) => ({ r, s: score(r) }))
+    .sort((a, b) => b.s - a.s || a.r.display_order - b.r.display_order)
+    .slice(0, limit)
+    .map(({ r }) => r);
 }

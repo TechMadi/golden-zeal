@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ContentService } from '../../core/services/content.service';
 import { AppHeaderComponent } from '../../layout/header/header.component';
 import { AppFooterComponent } from '../../layout/footer/footer.component';
@@ -54,28 +54,6 @@ import type { Project } from 'shared';
       text-overflow: ellipsis;
       margin-bottom: 3px;
       letter-spacing: 0.01em;
-    }
-    .card-client {
-      font-size: 0.65rem;
-      color: rgba(240,235,224,0.55);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .card-director {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      white-space: nowrap;
-      font-size: 0.65rem;
-      color: var(--gz-gold);
-    }
-    .card-director-logo {
-      height: 14px;
-      width: auto;
-      filter: brightness(0) invert(1);
-      flex-shrink: 0;
     }
 
     .aspect-half  { aspect-ratio: 16 / 9; }
@@ -149,15 +127,7 @@ import type { Project } from 'shared';
                 <div class="card-overlay-bar">
                   <div class="card-meta-left">
                     <p class="card-title">{{ project.title }}</p>
-                    @if (project.client) {
-                      <p class="card-client">{{ project.client }}</p>
-                    }
                   </div>
-                  @if (project.directors?.length) {
-                    <div class="card-director">
-                      {{ project.directors!.join(', ') }}
-                    </div>
-                  }
                 </div>
               </a>
             }
@@ -172,6 +142,7 @@ import type { Project } from 'shared';
 })
 export class CinematicComponent implements OnInit {
   private readonly content = inject(ContentService);
+  private readonly route = inject(ActivatedRoute);
 
   projects = signal<Project[]>([]);
   loading = signal(true);
@@ -189,6 +160,13 @@ export class CinematicComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // ?filter=commissioned | original-film — lets the nav link straight to a sub-category
+    const filterMap: Record<string, string> = { commissioned: 'COMMISSIONED', 'original-film': 'ORIGINAL FILM' };
+    this.route.queryParamMap.subscribe((params) => {
+      const filter = params.get('filter');
+      this.activeFilter.set((filter && filterMap[filter.toLowerCase()]) || 'ALL');
+    });
+
     this.content.getProjects('cinematic').subscribe((p) => {
       this.projects.set(p);
       this.loading.set(false);
