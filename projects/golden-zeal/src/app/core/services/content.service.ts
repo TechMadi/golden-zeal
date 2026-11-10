@@ -10,6 +10,7 @@ import type {
   SiteSetting,
   Showreel,
   ApprenticeshipCohort,
+  Partner,
 } from 'shared';
 
 // Credits are pulled with project lists so cards can show who directed.
@@ -54,7 +55,7 @@ export class ContentService {
       this.sb
         .from('projects')
         .select(
-          '*, stills:project_stills(*), credits:project_credits(*, team_member:team_members(id,name,slug))'
+          '*, stills:project_stills(*), credits:project_credits(*, team_member:team_members(id,name,slug)), partners(id,name,slug,specialty,cover_url,published)'
         )
         .eq('slug', slug)
         .maybeSingle()
@@ -63,6 +64,9 @@ export class ContentService {
         const project = r.data as Project | null;
         if (!project) return null;
         project.credits = [...(project.credits ?? [])].sort((a, b) => a.display_order - b.display_order);
+        // RLS already hides unpublished partners from visitors; this also covers a logged-in CRM session.
+        project.partners = ((project.partners ?? []) as (NonNullable<Project['partners']>[number] & { published?: boolean })[])
+          .filter((pt) => pt.published !== false);
         return withDirectors(project);
       })
     );
@@ -103,6 +107,48 @@ export class ContentService {
         }
         return projects.sort((a, b) => a.display_order - b.display_order);
       })
+    );
+  }
+
+  // ── Partners ───────────────────────────────────────────────
+  getPartners(): Observable<Partner[]> {
+    return this.track(
+      this.sb
+        .from('partners')
+        .select('*, project_partners(count)')
+        .eq('published', true)
+        .order('display_order', { ascending: true })
+    ).pipe(
+      map((r) =>
+        ((r.data as any[]) ?? []).map(({ project_partners, ...p }) => ({
+          ...(p as Partner),
+          project_count: project_partners?.[0]?.count ?? 0,
+        }))
+      )
+    );
+  }
+
+  getPartnerBySlug(slug: string): Observable<Partner | null> {
+    return this.track(
+      this.sb.from('partners').select('*').eq('slug', slug).eq('published', true).maybeSingle()
+    ).pipe(map((r) => (r.data as Partner) ?? null));
+  }
+
+  // Golden Zeal projects made with this partner, in the usual project order.
+  getProjectsByPartner(partnerId: string): Observable<Project[]> {
+    return this.track(
+      this.sb
+        .from('project_partners')
+        .select(`project:projects(${PROJECT_LIST_SELECT})`)
+        .eq('partner_id', partnerId)
+    ).pipe(
+      map((r) =>
+        ((r.data as any[]) ?? [])
+          .map((row) => row.project as Project | null)
+          .filter((p): p is Project => !!p)
+          .map(withDirectors)
+          .sort((a, b) => a.display_order - b.display_order)
+      )
     );
   }
 

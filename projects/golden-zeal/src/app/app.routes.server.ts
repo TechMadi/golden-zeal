@@ -5,7 +5,7 @@ import { SupabaseService } from 'shared';
 // Firebase Hosting serves static files only, so detail pages are prerendered at
 // build time from the slugs in Supabase. Anything added after the last build
 // falls back to client rendering until the next deploy.
-type SlugTable = 'projects' | 'team_members' | 'apprenticeship_cohorts';
+type SlugTable = 'projects' | 'team_members' | 'apprenticeship_cohorts' | 'partners';
 
 // `optional` tables may not exist yet — skip them instead of failing the build.
 function slugsFrom(table: SlugTable, { optional = false } = {}) {
@@ -35,6 +35,13 @@ export const serverRoutes: ServerRoute[] = [
     path: 'crew/:slug',
     renderMode: RenderMode.Prerender,
     getPrerenderParams: slugsFrom('team_members'),
+    fallback: PrerenderFallback.Client,
+  },
+  {
+    path: 'partners/:slug',
+    renderMode: RenderMode.Prerender,
+    // optional until the partners migration is applied everywhere the site is built
+    getPrerenderParams: slugsFrom('partners', { optional: true }),
     fallback: PrerenderFallback.Client,
   },
   {

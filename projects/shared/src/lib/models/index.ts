@@ -18,6 +18,26 @@ export interface Project {
   directors?: string[];
   stills?: ProjectStill[];
   credits?: ProjectCredit[];
+  partners?: Pick<Partner, 'id' | 'name' | 'slug' | 'specialty' | 'cover_url'>[];
+}
+
+export interface Partner {
+  id: string;
+  name: string;
+  slug: string;
+  specialty: string;
+  // One sentence on what they do with Golden Zeal — card + profile hero.
+  role_with_us: string;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  cover_url: string | null;
+  gallery_urls: string[];
+  published: boolean;
+  display_order: number;
+  created_at?: string | null;
+  // derived: number of linked projects (listing only links cards with projects)
+  project_count?: number;
 }
 
 export interface ProjectCredit {

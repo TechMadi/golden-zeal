@@ -104,6 +104,87 @@ export type Database = {
         }
         Relationships: []
       }
+      partners: {
+        Row: {
+          bio: string | null
+          cover_url: string | null
+          created_at: string | null
+          display_order: number
+          gallery_urls: string[]
+          id: string
+          location: string | null
+          name: string
+          published: boolean
+          role_with_us: string
+          slug: string
+          specialty: string
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          display_order?: number
+          gallery_urls?: string[]
+          id?: string
+          location?: string | null
+          name: string
+          published?: boolean
+          role_with_us: string
+          slug: string
+          specialty: string
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          cover_url?: string | null
+          created_at?: string | null
+          display_order?: number
+          gallery_urls?: string[]
+          id?: string
+          location?: string | null
+          name?: string
+          published?: boolean
+          role_with_us?: string
+          slug?: string
+          specialty?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      project_partners: {
+        Row: {
+          created_at: string | null
+          partner_id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          partner_id: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string | null
+          partner_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_partners_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_partners_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_credits: {
         Row: {
           created_at: string | null

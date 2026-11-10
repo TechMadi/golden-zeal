@@ -5,7 +5,7 @@ import type { SiteSetting, Showreel, ProjectCredit } from 'shared';
 
 type Table = 'projects' | 'project_stills' |
              'project_credits' | 'team_members' | 'regional_reps' | 'services' |
-             'faq' | 'site_settings' | 'showreel' | 'credit_roles';
+             'faq' | 'site_settings' | 'showreel' | 'credit_roles' | 'partners';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
@@ -74,6 +74,46 @@ export class AdminSupabaseService {
         .eq('project_id', projectId)
         .order('display_order', { ascending: true })
     ).pipe(map((r: AnyRecord) => (r['data'] as ProjectCredit[]) ?? []));
+  }
+
+  // ── Project ↔ partner links ────────────────────────────────
+  // Same join table behind the partner form's "Projects together" and the project form's "Partners".
+  listPartnerIdsForProject(projectId: string): Observable<string[]> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_partners').select('partner_id').eq('project_id', projectId)
+    ).pipe(map((r: AnyRecord) => ((r['data'] as { partner_id: string }[]) ?? []).map((x) => x.partner_id)));
+  }
+
+  listProjectIdsForPartner(partnerId: string): Observable<string[]> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_partners').select('project_id').eq('partner_id', partnerId)
+    ).pipe(map((r: AnyRecord) => ((r['data'] as { project_id: string }[]) ?? []).map((x) => x.project_id)));
+  }
+
+  // Number of linked projects per partner id, for the partners list.
+  countProjectsPerPartner(): Observable<Record<string, number>> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_partners').select('partner_id')
+    ).pipe(map((r: AnyRecord) => {
+      const counts: Record<string, number> = {};
+      for (const row of (r['data'] as { partner_id: string }[]) ?? []) {
+        counts[row.partner_id] = (counts[row.partner_id] ?? 0) + 1;
+      }
+      return counts;
+    }));
+  }
+
+  linkProjectPartner(projectId: string, partnerId: string): Observable<void> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_partners')
+        .upsert({ project_id: projectId, partner_id: partnerId }, { ignoreDuplicates: true })
+    ).pipe(map(() => undefined));
+  }
+
+  unlinkProjectPartner(projectId: string, partnerId: string): Observable<void> {
+    return this.q<AnyRecord>(
+      this.sb.from('project_partners').delete().eq('project_id', projectId).eq('partner_id', partnerId)
+    ).pipe(map(() => undefined));
   }
 
   // ── Site settings (key-value) ──────────────────────────────

@@ -83,6 +83,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
              class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
              [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">CREW</a>
 
+          <!-- Partners -->
+          <a routerLink="/partners" routerLinkActive="!text-[#C9A04A]"
+             class="text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-200"
+             [style.color]="scrolled() ? 'var(--gz-muted)' : 'var(--gz-text)'">PARTNERS</a>
+
           <a routerLink="/contact" class="btn-gold text-[0.7rem] py-2 px-4">CONTACT</a>
         </nav>
 
@@ -161,6 +166,7 @@ export class AppHeaderComponent {
     { path: '/commercial', label: 'ANIMATION',  sub: true,  queryParams: { filter: 'animations' } },
     { path: '/commercial', label: 'TVC',        sub: true,  queryParams: { filter: 'tvc' } },
     { path: '/crew',       label: 'CREW',       sub: false, queryParams: undefined },
+    { path: '/partners',   label: 'PARTNERS',   sub: false, queryParams: undefined },
     { path: '/contact',    label: 'CONTACT',    sub: false, queryParams: undefined },
   ];
 

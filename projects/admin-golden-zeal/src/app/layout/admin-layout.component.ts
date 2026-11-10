@@ -91,6 +91,7 @@ export class AdminLayoutComponent implements OnInit {
     { label: 'Projects',      path: '/projects'     },
     { label: 'Team',          path: '/team'         },
     { label: 'Credit Roles',  path: '/credit-roles' },
+    { label: 'Partners',      path: '/partners'     },
     { label: 'Reps',          path: '/reps'         },
     { label: 'Services',      path: '/services'     },
     { label: 'FAQ',           path: '/faq'          },

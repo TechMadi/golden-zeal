@@ -56,6 +56,17 @@ export const routes: Routes = [
       import('./pages/team-detail/team-detail.component').then((m) => m.TeamDetailComponent),
   },
   {
+    path: 'partners',
+    data: { seo: { title: 'Partners', description: 'The production houses, sound teams and specialists Golden Zeal Pictures makes films with across Africa.' } },
+    loadComponent: () =>
+      import('./pages/partners/partners.component').then((m) => m.PartnersComponent),
+  },
+  {
+    path: 'partners/:slug',
+    loadComponent: () =>
+      import('./pages/partners/partner-detail.component').then((m) => m.PartnerDetailComponent),
+  },
+  {
     path: 'screening',
     data: { seo: { title: 'Screenings & Premieres', description: 'Premieres, screenings and Q&A sessions with the filmmakers behind Golden Zeal Pictures\' latest work.' } },
     loadComponent: () =>

@@ -137,6 +137,25 @@ import type { Project } from 'shared';
                   <p class="text-base" style="color: var(--gz-text);">{{ project()!.year }}</p>
                 </div>
               }
+              @if (project()!.partners?.length) {
+                <div class="pb-4 mb-4" style="border-bottom: 1px solid var(--gz-border);">
+                  <p class="text-xs tracking-widest uppercase mb-3" style="color: var(--gz-muted);">In partnership with</p>
+                  <div class="flex flex-col gap-3">
+                    @for (pt of project()!.partners!; track pt.id) {
+                      <a [routerLink]="['/partners', pt.slug]" class="group flex items-center gap-3">
+                        @if (pt.cover_url) {
+                          <img [src]="pt.cover_url" [alt]="pt.name" class="w-12 h-12 object-cover shrink-0" loading="lazy" />
+                        }
+                        <span>
+                          <span class="block text-lg leading-none transition-colors group-hover:text-[#C9A04A]"
+                                style="font-family: 'Bebas Neue', sans-serif; color: var(--gz-text);">{{ pt.name }}</span>
+                          <span class="block text-[11px] tracking-[0.15em] uppercase mt-1" style="color: var(--gz-gold);">{{ pt.specialty }} →</span>
+                        </span>
+                      </a>
+                    }
+                  </div>
+                </div>
+              }
               @if (project()!.description && groupedCredits().length > 0) {
                 <p class="text-xs tracking-[0.3em] uppercase mt-8 mb-2" style="color: var(--gz-gold);">Crew</p>
                 @for (group of groupedCredits(); track group.role) {
