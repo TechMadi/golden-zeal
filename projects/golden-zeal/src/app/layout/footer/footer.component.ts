@@ -73,6 +73,7 @@ export class AppFooterComponent implements OnInit {
     { path: '/narrative',     label: 'Narrative' },
     { path: '/commercial',    label: 'Commercial' },
     { path: '/crew',          label: 'Crew' },
+    { path: '/partners',      label: 'Partners' },
     { path: '/contact',        label: 'Contact' },
   ];
 

@@ -39,6 +39,11 @@ export const routes: Routes = [
           import('./pages/team/team-admin.component').then((m) => m.TeamAdminComponent),
       },
       {
+        path: 'partners',
+        loadComponent: () =>
+          import('./pages/partners/partners-admin.component').then((m) => m.PartnersAdminComponent),
+      },
+      {
         path: 'reps',
         loadComponent: () =>
           import('./pages/reps/reps-admin.component').then((m) => m.RepsAdminComponent),

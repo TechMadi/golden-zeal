@@ -1,10 +1,10 @@
 import { Component, OnInit, signal, computed, inject, HostListener } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, switchMap, map } from 'rxjs';
 import { AdminSupabaseService } from '../../services/admin-supabase.service';
 import { PostHogService } from '../../services/posthog.service';
-import type { CreditRole, ProjectCredit, TeamMember } from 'shared';
+import type { CreditRole, Partner, ProjectCredit, TeamMember } from 'shared';
 
 const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
   commercial: [
@@ -71,6 +71,35 @@ const SUB_CATEGORIES: Record<string, { value: string; label: string }[]> = {
           <input id="client" type="text" formControlName="client"
                  class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
                  style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1);" />
+        </div>
+
+        <!-- Partners (projects made together — shown on the project page and the partner's profile) -->
+        <div>
+          <label class="block text-xs tracking-[0.2em] uppercase mb-2" style="color:#8a9e90;">
+            Partners <span style="color:#555; font-weight:400; text-transform:none; letter-spacing:0;">(companies we made this with)</span>
+          </label>
+          @if (selectedPartners().length) {
+            <div class="flex flex-wrap gap-2 mb-2">
+              @for (pt of selectedPartners(); track pt.id) {
+                <span class="inline-flex items-center gap-2 px-2.5 py-1 text-xs" style="background:rgba(201,160,74,0.15); color:#C9A04A;">
+                  {{ pt.name }}
+                  <button type="button" (click)="togglePartner(pt.id)" title="Remove">✕</button>
+                </span>
+              }
+            </div>
+          }
+          @if (partnerOptions().length) {
+            <select #partnerSelect (change)="togglePartner(partnerSelect.value); partnerSelect.value = ''"
+                    class="w-full bg-transparent py-2 px-3 text-sm focus:outline-none"
+                    style="color:#F0EBE0; border:1px solid rgba(240,235,224,0.1); background:#0f1f16;">
+              <option value="">Add a partner…</option>
+              @for (pt of partnerOptions(); track pt.id) {
+                <option [value]="pt.id">{{ pt.name }}{{ pt.published ? '' : ' (draft)' }}</option>
+              }
+            </select>
+          } @else if (allPartners().length === 0) {
+            <p class="text-xs" style="color:#555;">No partners yet. Add them on the Partners page.</p>
+          }
         </div>
 
         <!-- Year -->
@@ -313,6 +342,20 @@ export class ProjectFormComponent implements OnInit {
   editingCreditId = signal<string | null>(null);
   private projectId = '';
 
+  allPartners = signal<Partner[]>([]);
+  selectedPartnerIds = signal<string[]>([]);
+  private originalPartnerIds: string[] = [];
+  selectedPartners = computed(() => {
+    const byId = new Map(this.allPartners().map((p) => [p.id, p]));
+    return this.selectedPartnerIds().map((id) => byId.get(id)).filter((p): p is Partner => !!p);
+  });
+  partnerOptions = computed(() => this.allPartners().filter((p) => !this.selectedPartnerIds().includes(p.id)));
+
+  togglePartner(id: string): void {
+    if (!id) return;
+    this.selectedPartnerIds.update((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
+  }
+
   subCategoryOptions = computed(() => SUB_CATEGORIES[this.selectedCategory()] ?? []);
 
   form = this.fb.nonNullable.group({
@@ -404,6 +447,7 @@ export class ProjectFormComponent implements OnInit {
   ngOnInit(): void {
     this.admin.list<TeamMember>('team_members').subscribe((t) => this.teamMembers.set(t));
     this.admin.list<CreditRole>('credit_roles').subscribe((r) => this.roles.set(r.map((x) => x.name)));
+    this.admin.list<Partner>('partners').subscribe((p) => this.allPartners.set(p));
 
     // Auto-generate slug from title (new projects only)
     this.form.get('title')!.valueChanges.subscribe((title) => {
@@ -431,6 +475,10 @@ export class ProjectFormComponent implements OnInit {
         }
       });
       this.loadCredits();
+      this.admin.listPartnerIdsForProject(id).subscribe((ids) => {
+        this.originalPartnerIds = ids;
+        this.selectedPartnerIds.set(ids);
+      });
     }
   }
 
@@ -547,9 +595,22 @@ export class ProjectFormComponent implements OnInit {
       Object.entries(this.form.getRawValue()).map(([k, v]) => [k, v === '' ? null : v])
     );
 
-    const obs = this.isEdit()
+    const selectedPartners = this.selectedPartnerIds();
+    const originalPartners = this.originalPartnerIds;
+    const obs = (this.isEdit()
       ? this.admin.update('projects', this.projectId, data)
-      : this.admin.create('projects', data);
+      : this.admin.create('projects', data)
+    ).pipe(
+      // Sync partner links once the project exists (new projects get their id here).
+      switchMap((saved) => {
+        const projectId = (saved as { id: string }).id;
+        const ops = [
+          ...selectedPartners.filter((id) => !originalPartners.includes(id)).map((id) => this.admin.linkProjectPartner(projectId, id)),
+          ...originalPartners.filter((id) => !selectedPartners.includes(id)).map((id) => this.admin.unlinkProjectPartner(projectId, id)),
+        ];
+        return ops.length ? forkJoin(ops).pipe(map(() => saved)) : of(saved);
+      })
+    );
 
     obs.subscribe({
       next: (saved) => {
