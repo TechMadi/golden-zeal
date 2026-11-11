@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, signal, computed, effect, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ContentService } from '../../core/services/content.service';
@@ -32,9 +33,14 @@ import type { Showreel } from 'shared';
 
       <!-- Background video for the active reel (muted, autoplay) -->
       @if (activeReel()) {
-        <div class="hero-video-container absolute inset-0">
+        <!-- Hidden until the video is actually playing, so YouTube's own loading UI
+             (big play button, title bar) never shows; the poster image sits underneath. -->
+        <div class="hero-video-container absolute inset-0"
+             [style.opacity]="bgPlaying() ? '1' : '0'"
+             style="transition: opacity 0.8s ease;">
           <iframe
             [src]="bgReelSrc()"
+            (load)="onBgVideoLoad($event)"
             frameborder="0"
             allow="autoplay; fullscreen; picture-in-picture"
             title="Golden Zeal Pictures Showreel"
@@ -188,6 +194,10 @@ import type { Showreel } from 'shared';
 export class HomeComponent implements OnInit, OnDestroy {
   private readonly content   = inject(ContentService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+
+  /** True once the background video reports it is playing. */
+  bgPlaying = signal(false);
 
   reels       = signal<Showreel[]>([]);
   activeIndex = signal(0);
@@ -211,18 +221,47 @@ export class HomeComponent implements OnInit, OnDestroy {
     { path: '/narrative',  label: 'NARRATIVE'  },
   ];
 
-  bgReelSrc(): SafeResourceUrl {
+  // computed (not a method) so the iframe src only changes when the reel changes —
+  // a fresh SafeResourceUrl on every change detection would reload the player.
+  // enablejsapi=1 lets the player tell us when playback starts (see onPlayerMessage).
+  bgReelSrc = computed<SafeResourceUrl>(() => {
     const r = this.activeReel();
     if (!r) return '';
     if (r.youtube_id) {
       return this.sanitizer.bypassSecurityTrustResourceUrl(
-        `https://www.youtube.com/embed/${r.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${r.youtube_id}&controls=0&disablekb=1&modestbranding=1&playsinline=1`
+        `https://www.youtube.com/embed/${r.youtube_id}?autoplay=1&mute=1&loop=1&playlist=${r.youtube_id}&controls=0&disablekb=1&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&fs=0&enablejsapi=1`
       );
     }
     return this.sanitizer.bypassSecurityTrustResourceUrl(
       `https://player.vimeo.com/video/${r.vimeo_id}?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0&playsinline=1`
     );
+  });
+
+  // Hide the video again whenever the reel switches, until the new one plays.
+  private readonly resetPlaying = effect(() => {
+    this.activeReel();
+    this.bgPlaying.set(false);
+  });
+
+  onBgVideoLoad(event: Event): void {
+    const frame = event.target as HTMLIFrameElement;
+    if (this.activeReel()?.youtube_id) {
+      // Subscribe to YouTube's player events; it then posts onStateChange/infoDelivery.
+      frame.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 'bg' }), '*');
+    } else {
+      // Vimeo background mode has no controls to hide — show it once loaded.
+      this.bgPlaying.set(true);
+    }
   }
+
+  private readonly onPlayerMessage = (e: MessageEvent): void => {
+    if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin) || typeof e.data !== 'string') return;
+    try {
+      const msg = JSON.parse(e.data);
+      const state = msg.event === 'onStateChange' ? msg.info : msg.info?.playerState;
+      if (state === 1) this.bgPlaying.set(true); // 1 = playing
+    } catch { /* not a player message */ }
+  };
 
   openReel(): void {
     this.reelOpen.set(true);
@@ -275,6 +314,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    if (this.isBrowser) window.addEventListener('message', this.onPlayerMessage);
     this.content.getShowreels().subscribe((reels) => {
       this.reels.set(reels);
       if (reels.length > 1) this.startTimer();
@@ -287,5 +327,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.timer) clearInterval(this.timer);
+    if (this.isBrowser) window.removeEventListener('message', this.onPlayerMessage);
   }
 }
